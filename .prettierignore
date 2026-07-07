@@ -1,0 +1,25 @@
+# Build outputs
+dist/
+build/
+
+# Dependencies
+node_modules/
+
+# Local env files
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# System and logs
+*.log
+.DS_Store
+
+# Static assets you don't want formatted
+public/
+
+# Configurations (Optional: if you prefer manual formatting for these)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
