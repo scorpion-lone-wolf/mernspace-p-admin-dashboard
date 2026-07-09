@@ -24,5 +24,6 @@ dist-ssr
 *.sw?
 
 .env.*
+.env
 # Except for the example template file
 !.env.example

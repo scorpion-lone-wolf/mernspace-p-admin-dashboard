@@ -1,8 +1,40 @@
+import { login } from "@/api/auth.api";
 import logo from "@/assets/logo.svg";
+import type { Credentails } from "@/types";
 import { LockFilled, LockOutlined, UserOutlined } from "@ant-design/icons";
-import { Button, Card, Checkbox, Flex, Form, Input, Layout, Space } from "antd";
+import { useMutation } from "@tanstack/react-query";
+import {
+  Alert,
+  Button,
+  Card,
+  Checkbox,
+  Flex,
+  Form,
+  Input,
+  Layout,
+  Space,
+} from "antd";
+
+const loginUser = async (credentails: Credentails) => {
+  // here we make the request to the server to mutate the data
+  const response = await login(credentails);
+  return response.data;
+};
 
 function LoginPage() {
+  const {
+    mutate,
+    isPending: isLoading,
+    isError: hasError,
+    error,
+  } = useMutation({
+    mutationKey: ["login"],
+    mutationFn: loginUser,
+    onSuccess: async () => {
+      console.log("Login Successful");
+    },
+  });
+
   return (
     <Layout
       style={{
@@ -40,7 +72,21 @@ function LoginPage() {
           name="login"
           style={{ maxWidth: 360 }}
           initialValues={{ remember: true }}
+          onFinish={(values) => {
+            console.log(values);
+            mutate({
+              email: values.username,
+              password: values.password,
+            });
+          }}
         >
+          {hasError && (
+            <Alert
+              style={{ marginBottom: 10 }}
+              type="error"
+              title={error?.message}
+            />
+          )}
           <Form.Item
             name="username"
             rules={[
@@ -68,7 +114,12 @@ function LoginPage() {
             </Flex>
           </Form.Item>
           <Form.Item>
-            <Button type="primary" style={{ width: "100%" }}>
+            <Button
+              type="primary"
+              style={{ width: "100%" }}
+              htmlType="submit"
+              loading={isLoading}
+            >
               Log in
             </Button>
           </Form.Item>
