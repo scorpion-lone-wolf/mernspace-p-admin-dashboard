@@ -1,20 +1,11 @@
-import { login, me } from "@/api/auth.api";
+import { login, logout, me } from "@/api/auth.api";
 import logo from "@/assets/logo.svg";
+import { usePermissions } from "@/hooks/usePermissions";
 import { useAuthStore } from "@/store";
 import type { Credentails } from "@/types";
 import { LockFilled, LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import {
-  Alert,
-  Button,
-  Card,
-  Checkbox,
-  Flex,
-  Form,
-  Input,
-  Layout,
-  Space,
-} from "antd";
+import { Alert, Button, Card, Checkbox, Flex, Form, Input, Layout, Space } from "antd";
 
 const loginUser = async (credentails: Credentails) => {
   // here we make the request to the server to mutate the data
@@ -28,8 +19,9 @@ const getMe = async () => {
 };
 
 function LoginPage() {
-  const { setUser } = useAuthStore();
-  const { data: userData, refetch } = useQuery({
+  const { isAllowed } = usePermissions();
+  const { setUser, logout: logoutFromStore } = useAuthStore();
+  const { refetch } = useQuery({
     queryKey: ["user"],
     queryFn: getMe,
     enabled: false, // at the starting it will not run when the page loads
@@ -43,10 +35,15 @@ function LoginPage() {
     mutationKey: ["login"],
     mutationFn: loginUser,
     onSuccess: async () => {
-      // we will hit "/auth/me" on server
-      await refetch();
+      const userData = await refetch();
+      // hook that checks if user is admin or manager else not allowed
+      if (!isAllowed(userData.data.data.at(0))) {
+        await logout();
+        logoutFromStore();
+        return;
+      }
       // store the user data in store
-      setUser(userData.data.at(0));
+      setUser(userData.data.data.at(0));
     },
   });
 
@@ -95,13 +92,7 @@ function LoginPage() {
             });
           }}
         >
-          {hasError && (
-            <Alert
-              style={{ marginBottom: 10 }}
-              type="error"
-              title={error?.message}
-            />
-          )}
+          {hasError && <Alert style={{ marginBottom: 10 }} type="error" title={error?.message} />}
           <Form.Item
             name="username"
             rules={[
@@ -129,12 +120,7 @@ function LoginPage() {
             </Flex>
           </Form.Item>
           <Form.Item>
-            <Button
-              type="primary"
-              style={{ width: "100%" }}
-              htmlType="submit"
-              loading={isLoading}
-            >
+            <Button type="primary" style={{ width: "100%" }} htmlType="submit" loading={isLoading}>
               Log in
             </Button>
           </Form.Item>
