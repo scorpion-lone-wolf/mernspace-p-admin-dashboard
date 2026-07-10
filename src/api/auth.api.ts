@@ -1,6 +1,6 @@
 import type { Credentails } from "@/types";
 import api from "./axios";
 
-export const login = (credentials: Credentails) => api.post("/auth/login", credentials);
-export const me = () => api.get("/auth/me");
-export const logout = () => api.post("/auth/logout");
+export const login = async (credentials: Credentails) => await api.post("/auth/login", credentials);
+export const me = async () => await api.get("/auth/me");
+export const logout = async () => await api.post("/auth/logout");

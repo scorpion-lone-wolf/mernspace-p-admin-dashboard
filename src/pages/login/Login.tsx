@@ -21,11 +21,24 @@ const getMe = async () => {
 function LoginPage() {
   const { isAllowed } = usePermissions();
   const { setUser, logout: logoutFromStore } = useAuthStore();
+
+  // getMe query
   const { refetch } = useQuery({
     queryKey: ["user"],
     queryFn: getMe,
     enabled: false, // at the starting it will not run when the page loads
   });
+
+  // logout mutation
+  const { mutate: logoutMutate } = useMutation({
+    mutationKey: ["logout"],
+    mutationFn: logout,
+    onSuccess: () => {
+      logoutFromStore();
+    },
+  });
+
+  // login mutation
   const {
     mutate,
     isPending: isLoading,
@@ -38,8 +51,7 @@ function LoginPage() {
       const userData = await refetch();
       // hook that checks if user is admin or manager else not allowed
       if (!isAllowed(userData.data.data.at(0))) {
-        await logout();
-        logoutFromStore();
+        logoutMutate();
         return;
       }
       // store the user data in store
