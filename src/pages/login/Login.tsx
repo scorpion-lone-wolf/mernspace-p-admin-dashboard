@@ -1,8 +1,8 @@
-import { login } from "@/api/auth.api";
+import { login, me } from "@/api/auth.api";
 import logo from "@/assets/logo.svg";
 import type { Credentails } from "@/types";
 import { LockFilled, LockOutlined, UserOutlined } from "@ant-design/icons";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Alert,
   Button,
@@ -21,7 +21,17 @@ const loginUser = async (credentails: Credentails) => {
   return response.data;
 };
 
+const getMe = async () => {
+  const response = await me();
+  return response.data;
+};
+
 function LoginPage() {
+  const { data: userData, refetch } = useQuery({
+    queryKey: ["user"],
+    queryFn: getMe,
+    enabled: false, // at the starting it will not run when the page loads
+  });
   const {
     mutate,
     isPending: isLoading,
@@ -31,6 +41,10 @@ function LoginPage() {
     mutationKey: ["login"],
     mutationFn: loginUser,
     onSuccess: async () => {
+      // we will hit "/auth/me" on server
+      await refetch();
+      console.log("userData", userData);
+      // store the users data in our store
       console.log("Login Successful");
     },
   });
