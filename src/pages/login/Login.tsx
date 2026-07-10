@@ -1,5 +1,6 @@
 import { login, me } from "@/api/auth.api";
 import logo from "@/assets/logo.svg";
+import { useAuthStore } from "@/store";
 import type { Credentails } from "@/types";
 import { LockFilled, LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -27,6 +28,7 @@ const getMe = async () => {
 };
 
 function LoginPage() {
+  const { setUser } = useAuthStore();
   const { data: userData, refetch } = useQuery({
     queryKey: ["user"],
     queryFn: getMe,
@@ -43,9 +45,8 @@ function LoginPage() {
     onSuccess: async () => {
       // we will hit "/auth/me" on server
       await refetch();
-      console.log("userData", userData);
-      // store the users data in our store
-      console.log("Login Successful");
+      // store the user data in store
+      setUser(userData.data.at(0));
     },
   });
 
