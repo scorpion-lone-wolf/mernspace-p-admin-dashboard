@@ -1,6 +1,7 @@
 import { me } from "@/api/auth.api";
 import { useAuthStore } from "@/store";
 import { useQuery } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 
@@ -13,6 +14,12 @@ function Root() {
   const { data, isLoading } = useQuery({
     queryKey: ["user"],
     queryFn: getMe,
+    retry: (failureCount, error) => {
+      if (error instanceof AxiosError && error?.response?.status === 401) {
+        return false;
+      }
+      return failureCount < 3;
+    },
   });
   useEffect(() => {
     if (data?.data?.length > 0) {
