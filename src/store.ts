@@ -10,16 +10,20 @@ export interface User {
 
 interface AuthState {
   user: User | null;
+  isAuthLoading: boolean;
   setUser: (user: User) => void;
+  setAuthLoading: (isAuthLoading: boolean) => void;
   logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   devtools((set) => ({
     user: null,
+    isAuthLoading: true,
 
     // actions
     setUser: (user: User) => set({ user }),
+    setAuthLoading: (isAuthLoading: boolean) => set({ isAuthLoading }),
 
     logout: () => set({ user: null }),
   }))

@@ -1,5 +1,5 @@
 function HomePage() {
-  return <div>Hello admin dashboard</div>;
+  return <div>I am inside Admin Dashboard</div>;
 }
 
 export default HomePage;

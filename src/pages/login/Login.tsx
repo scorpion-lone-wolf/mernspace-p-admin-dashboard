@@ -1,11 +1,12 @@
 import { login, logout, me } from "@/api/auth.api";
-import logo from "@/assets/logo.svg";
+import LogoIcon from "@/components/icons/LogoIcon";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useAuthStore } from "@/store";
 import type { Credentails } from "@/types";
 import { LockFilled, LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Alert, Button, Card, Checkbox, Flex, Form, Input, Layout, Space } from "antd";
+import { useNavigate } from "react-router-dom";
 
 const loginUser = async (credentails: Credentails) => {
   // here we make the request to the server to mutate the data
@@ -21,6 +22,7 @@ const getMe = async () => {
 function LoginPage() {
   const { isAllowed } = usePermissions();
   const { setUser, logout: logoutFromStore } = useAuthStore();
+  const navigate = useNavigate();
 
   // getMe query
   const { refetch } = useQuery({
@@ -56,6 +58,7 @@ function LoginPage() {
       }
       // store the user data in store
       setUser(userData.data.data.at(0));
+      navigate("/", { replace: true });
     },
   });
 
@@ -68,14 +71,7 @@ function LoginPage() {
         alignItems: "center",
       }}
     >
-      <img
-        src={logo}
-        alt="Logo"
-        style={{
-          width: 100,
-          height: 100,
-        }}
-      />
+      <LogoIcon />
       <Card
         title={
           <Space

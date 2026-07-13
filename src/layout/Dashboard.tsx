@@ -1,10 +1,59 @@
+import BasketIcon from "@/components/icons/BasketIcon";
+import { foodIcon } from "@/components/icons/FoodIcon";
+import GiftIcon from "@/components/icons/GiftIcon";
+import HomeIcon from "@/components/icons/HomeIcon";
+import Logo from "@/components/icons/LogoIcon";
+import UserIcon from "@/components/icons/UserIcon";
 import { useAuthStore } from "@/store";
-import { Navigate, Outlet } from "react-router-dom";
+import Icon from "@ant-design/icons";
+import { Layout, Menu, theme } from "antd";
+import { useState } from "react";
+import { Navigate, NavLink, Outlet, useLocation } from "react-router-dom";
+
+const { Sider, Header, Content, Footer } = Layout;
+
+const items = [
+  {
+    key: "/",
+    label: <NavLink to="/">Home</NavLink>,
+    icon: <Icon component={HomeIcon} />,
+  },
+
+  {
+    key: "/users",
+    label: <NavLink to="/users">Users</NavLink>,
+    icon: <Icon component={UserIcon} />,
+  },
+  {
+    key: "/resturants",
+    label: <NavLink to="/resturants">Resturants</NavLink>,
+    icon: <Icon component={foodIcon} />,
+  },
+  {
+    key: "/products",
+    label: <NavLink to="/products">Products</NavLink>,
+    icon: <Icon component={BasketIcon} />,
+  },
+  {
+    key: "/promo",
+    label: <NavLink to="/promo">Promo</NavLink>,
+    icon: <Icon component={GiftIcon} />,
+  },
+];
 
 function Dashboard() {
+  const [collapsed, setCollapsed] = useState(false);
+  const location = useLocation();
+  const {
+    token: { colorBgContainer },
+  } = theme.useToken();
   // This will decide if the below protected route should be rendered or not
   // We will check the store, if we have user data , then user is authenticated and allowed to see this page else not (we will redirect them to login page)
-  const { user } = useAuthStore();
+  const { user, isAuthLoading } = useAuthStore();
+
+  if (isAuthLoading) {
+    return <div>Loading...</div>;
+  }
 
   if (!user) {
     // user is not logged in
@@ -13,8 +62,29 @@ function Dashboard() {
   }
   return (
     <div>
-      <h2>This is Dashboard</h2>
-      <Outlet />
+      {/* All this here will be common to all routes */}
+      <Layout style={{ minHeight: "100vh" }}>
+        <Sider theme="light" collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
+          <div style={{ color: "white", height: "64px" }} className="logo">
+            <Logo />
+          </div>
+          <Menu theme="light" defaultSelectedKeys={[location.pathname]} mode="inline" items={items} />
+        </Sider>
+        <Layout>
+          <Header style={{ padding: 0, background: colorBgContainer }} />
+          <Content style={{ margin: "0 16px" }}>
+            <div
+              style={{
+                padding: 24,
+                minHeight: 360,
+              }}
+            >
+              <Outlet />
+            </div>
+          </Content>
+          <Footer style={{ textAlign: "center" }}> MernSpace Pizza Shop</Footer>
+        </Layout>
+      </Layout>
     </div>
   );
 }

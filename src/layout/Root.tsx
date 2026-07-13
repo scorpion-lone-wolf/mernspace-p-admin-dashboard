@@ -10,8 +10,8 @@ const getMe = async () => {
   return response.data;
 };
 function Root() {
-  const { setUser } = useAuthStore();
-  const { data, isLoading } = useQuery({
+  const { setUser, setAuthLoading } = useAuthStore();
+  const { data, isLoading, isFetched } = useQuery({
     queryKey: ["user"],
     queryFn: getMe,
     retry: (failureCount, error) => {
@@ -26,6 +26,11 @@ function Root() {
       setUser(data.data.at(0));
     }
   }, [data, setUser]);
+
+  useEffect(() => {
+    setAuthLoading(isLoading || !isFetched);
+  }, [isFetched, isLoading, setAuthLoading]);
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
