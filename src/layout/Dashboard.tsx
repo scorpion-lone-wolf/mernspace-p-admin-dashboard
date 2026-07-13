@@ -1,3 +1,4 @@
+import { logout } from "@/api/auth.api";
 import BasketIcon from "@/components/icons/BasketIcon";
 import { foodIcon } from "@/components/icons/FoodIcon";
 import GiftIcon from "@/components/icons/GiftIcon";
@@ -5,8 +6,9 @@ import HomeIcon from "@/components/icons/HomeIcon";
 import Logo from "@/components/icons/LogoIcon";
 import UserIcon from "@/components/icons/UserIcon";
 import { useAuthStore } from "@/store";
-import Icon from "@ant-design/icons";
-import { Layout, Menu, theme } from "antd";
+import Icon, { BellFilled, DownOutlined } from "@ant-design/icons";
+import { useMutation } from "@tanstack/react-query";
+import { Avatar, Badge, Dropdown, Flex, Layout, Menu, Space, Tag, theme } from "antd";
 import { useState } from "react";
 import { Navigate, NavLink, Outlet, useLocation } from "react-router-dom";
 
@@ -45,11 +47,19 @@ function Dashboard() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const {
-    token: { colorBgContainer },
+    token: { colorBgContainer, colorPrimary },
   } = theme.useToken();
   // This will decide if the below protected route should be rendered or not
   // We will check the store, if we have user data , then user is authenticated and allowed to see this page else not (we will redirect them to login page)
-  const { user, isAuthLoading } = useAuthStore();
+  const { user, isAuthLoading, logout: logoutFromState } = useAuthStore();
+
+  const { mutate } = useMutation({
+    mutationKey: ["logout"],
+    mutationFn: logout,
+    onSuccess: () => {
+      logoutFromState();
+    },
+  });
 
   if (isAuthLoading) {
     return <div>Loading...</div>;
@@ -71,7 +81,30 @@ function Dashboard() {
           <Menu theme="light" defaultSelectedKeys={[location.pathname]} mode="inline" items={items} />
         </Sider>
         <Layout>
-          <Header style={{ padding: 0, background: colorBgContainer }} />
+          <Header style={{ paddingLeft: "1rem", paddingRight: "1rem", background: colorBgContainer }}>
+            <Flex align="center" gap="middle" justify="space-between">
+              <Tag color={colorPrimary}>Global</Tag>
+              <Space size="medium">
+                <Badge dot>
+                  <BellFilled color={colorPrimary} size={100} />
+                </Badge>
+                <Avatar style={{ backgroundColor: "#fde3cf", color: "#f56a00" }}>U</Avatar>
+                <Dropdown
+                  menu={{
+                    items: [
+                      {
+                        key: "/logout",
+                        label: "logout",
+                        onClick: () => mutate(),
+                      },
+                    ],
+                  }}
+                >
+                  <DownOutlined />
+                </Dropdown>
+              </Space>
+            </Flex>
+          </Header>
           <Content style={{ margin: "0 16px" }}>
             <div
               style={{
