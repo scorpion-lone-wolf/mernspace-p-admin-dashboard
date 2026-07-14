@@ -52,7 +52,6 @@ function Dashboard() {
   // This will decide if the below protected route should be rendered or not
   // We will check the store, if we have user data , then user is authenticated and allowed to see this page else not (we will redirect them to login page)
   const { user, isAuthLoading, logout: logoutFromState } = useAuthStore();
-
   const { mutate } = useMutation({
     mutationKey: ["logout"],
     mutationFn: logout,
@@ -83,7 +82,7 @@ function Dashboard() {
         <Layout>
           <Header style={{ paddingLeft: "1rem", paddingRight: "1rem", background: colorBgContainer }}>
             <Flex align="center" gap="middle" justify="space-between">
-              <Tag color={colorPrimary}>Global</Tag>
+              <Tag color={colorPrimary}>{user.role === "ADMIN" ? "You are an Admin" : user?.tenant?.name}</Tag>
               <Space size="medium">
                 <Badge dot>
                   <BellFilled color={colorPrimary} size={100} />
