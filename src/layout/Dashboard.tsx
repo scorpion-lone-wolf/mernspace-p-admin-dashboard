@@ -77,7 +77,7 @@ function Dashboard() {
           <div style={{ color: "white", height: "64px" }} className="logo">
             <Logo />
           </div>
-          <Menu theme="light" defaultSelectedKeys={[location.pathname]} mode="inline" items={items} />
+          <Menu theme="light" selectedKeys={[location.pathname]} mode="inline" items={items} />
         </Sider>
         <Layout>
           <Header style={{ paddingLeft: "1rem", paddingRight: "1rem", background: colorBgContainer }}>
