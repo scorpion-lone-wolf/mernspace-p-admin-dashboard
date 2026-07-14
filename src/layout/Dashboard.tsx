@@ -10,7 +10,7 @@ import Icon, { BellFilled, DownOutlined } from "@ant-design/icons";
 import { useMutation } from "@tanstack/react-query";
 import { Avatar, Badge, Dropdown, Flex, Layout, Menu, Space, Tag, theme } from "antd";
 import { useState } from "react";
-import { Navigate, NavLink, Outlet, useLocation } from "react-router-dom";
+import { Link, Navigate, NavLink, Outlet, useLocation } from "react-router-dom";
 
 const { Sider, Header, Content, Footer } = Layout;
 
@@ -75,7 +75,9 @@ function Dashboard() {
       <Layout style={{ minHeight: "100vh" }}>
         <Sider theme="light" collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
           <div style={{ color: "white", height: "64px" }} className="logo">
-            <Logo />
+            <Link to="/">
+              <Logo />
+            </Link>
           </div>
           <Menu theme="light" selectedKeys={[location.pathname]} mode="inline" items={items} />
         </Sider>
