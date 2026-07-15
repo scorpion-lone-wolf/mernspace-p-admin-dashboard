@@ -14,34 +14,39 @@ import { Link, Navigate, NavLink, Outlet, useLocation } from "react-router-dom";
 
 const { Sider, Header, Content, Footer } = Layout;
 
-const items = [
-  {
-    key: "/",
-    label: <NavLink to="/">Home</NavLink>,
-    icon: <Icon component={HomeIcon} />,
-  },
+const getMenuItems = (role: string) => {
+  const baseItems = [
+    {
+      key: "/",
+      label: <NavLink to="/">Home</NavLink>,
+      icon: <Icon component={HomeIcon} />,
+    },
 
-  {
-    key: "/users",
-    label: <NavLink to="/users">Users</NavLink>,
-    icon: <Icon component={UserIcon} />,
-  },
-  {
-    key: "/resturants",
-    label: <NavLink to="/resturants">Resturants</NavLink>,
-    icon: <Icon component={foodIcon} />,
-  },
-  {
-    key: "/products",
-    label: <NavLink to="/products">Products</NavLink>,
-    icon: <Icon component={BasketIcon} />,
-  },
-  {
-    key: "/promo",
-    label: <NavLink to="/promo">Promo</NavLink>,
-    icon: <Icon component={GiftIcon} />,
-  },
-];
+    {
+      key: "/resturants",
+      label: <NavLink to="/resturants">Resturants</NavLink>,
+      icon: <Icon component={foodIcon} />,
+    },
+    {
+      key: "/products",
+      label: <NavLink to="/products">Products</NavLink>,
+      icon: <Icon component={BasketIcon} />,
+    },
+    {
+      key: "/promo",
+      label: <NavLink to="/promo">Promo</NavLink>,
+      icon: <Icon component={GiftIcon} />,
+    },
+  ];
+  if (role === "ADMIN") {
+    baseItems.splice(1, 0, {
+      key: "/users",
+      label: <NavLink to="/users">Users</NavLink>,
+      icon: <Icon component={UserIcon} />,
+    });
+  }
+  return baseItems;
+};
 
 function Dashboard() {
   const [collapsed, setCollapsed] = useState(false);
@@ -79,7 +84,7 @@ function Dashboard() {
               <Logo />
             </Link>
           </div>
-          <Menu theme="light" selectedKeys={[location.pathname]} mode="inline" items={items} />
+          <Menu theme="light" selectedKeys={[location.pathname]} mode="inline" items={getMenuItems(user?.role)} />
         </Sider>
         <Layout>
           <Header style={{ paddingLeft: "1rem", paddingRight: "1rem", background: colorBgContainer }}>
