@@ -4,6 +4,7 @@ import { RightOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Breadcrumb, Space, Table, type TableColumnsType } from "antd";
 import { Link, Navigate } from "react-router-dom";
+import UsersFilter from "./UsersFilter";
 
 const columns: TableColumnsType<User> = [
   { title: "Customer name", dataIndex: "firstName", key: "fullName", render: (_text, record) => record.firstName + " " + record.lastName },
@@ -51,8 +52,8 @@ function Users() {
 
       {isLoading && <div>Loading...</div>}
       {error && <div>{error.message}</div>}
-      {/* TODO : Add FIlters  */}
-
+      {/*  Add FIlters  */}
+      <UsersFilter />
       {/* This is the users table */}
       {userData && <Table columns={columns} dataSource={userData.data} rowKey={(record) => record.id} />}
     </Space>
