@@ -2,7 +2,7 @@ import { BarChartIcon } from "@/components/icons/BarChartIcon";
 import BasketIcon from "@/components/icons/BasketIcon";
 import { useAuthStore } from "@/store";
 import Icon from "@ant-design/icons";
-import { Button, Card, Col, List, Row, Skeleton, Space, Statistic, Tag, Typography } from "antd";
+import { Button, Card, Col, Flex, Row, Skeleton, Space, Statistic, Tag, Typography } from "antd";
 import type { ComponentType } from "react";
 import { Link } from "react-router-dom";
 
@@ -93,28 +93,31 @@ function HomePage() {
         </Col>
         <Col xs={24} sm={24} md={24} lg={12} xl={12}>
           <Card title={<CardTitle title="Recent orders" PrefixIcon={BasketIcon} />}>
-            <List
-              className="demo-loadmore-list"
-              loading={false}
-              itemLayout="horizontal"
-              loadMore={true}
-              dataSource={list}
-              renderItem={(item) => (
-                <List.Item>
+            <Flex vertical gap={16}>
+              {list.map((item, index) => (
+                <Card key={index} size="small">
                   <Skeleton avatar title={false} loading={item.loading} active>
-                    <List.Item.Meta title={<a href="https://ant.design">{item.OrderSummary}</a>} description={item.address} />
-                    <Row style={{ flex: 1 }} justify="space-between">
+                    <Row align="middle" justify="space-between">
+                      <Col>
+                        <Flex vertical>
+                          <Typography.Link href="https://ant.design">{item.OrderSummary}</Typography.Link>
+                          <Text type="secondary">{item.address}</Text>
+                        </Flex>
+                      </Col>
+
                       <Col>
                         <Text strong>₹{item.amount}</Text>
                       </Col>
+
                       <Col>
                         <Tag color="volcano">{item.status}</Tag>
                       </Col>
                     </Row>
                   </Skeleton>
-                </List.Item>
-              )}
-            />
+                </Card>
+              ))}
+            </Flex>
+
             <div style={{ marginTop: 20 }}>
               <Button type="link">
                 <Link to="/orders">See all orders</Link>
