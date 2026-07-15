@@ -14,6 +14,9 @@ const columns: TableColumnsType<User> = [
 ];
 
 function Users() {
+  function handleFilterChange(filterName: string, filterValue: string) {
+    console.log(filterName, filterValue);
+  }
   const { user, isAuthLoading } = useAuthStore();
   const {
     data: userData,
@@ -25,6 +28,7 @@ function Users() {
       return (await users()).data;
     },
   });
+  console.log("Filter");
   if (isAuthLoading) {
     return <div>Loading...</div>;
   }
@@ -53,7 +57,7 @@ function Users() {
       {isLoading && <div>Loading...</div>}
       {error && <div>{error.message}</div>}
       {/*  Add FIlters  */}
-      <UsersFilter />
+      <UsersFilter onFilterChange={handleFilterChange} />
       {/* This is the users table */}
       {userData && <Table columns={columns} dataSource={userData.data} rowKey={(record) => record.id} />}
     </Space>

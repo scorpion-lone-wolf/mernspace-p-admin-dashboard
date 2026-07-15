@@ -1,12 +1,21 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { Button, Card, Col, Flex, Input, Row, Select, Space } from "antd";
 
-function UsersFilter() {
+type UserFilterProps = {
+  onFilterChange: (filterName: string, filterValue: string) => void;
+};
+function UsersFilter({ onFilterChange }: Readonly<UserFilterProps>) {
   return (
     <Card>
       <Row gutter={[16, 16]} align="middle">
         <Col xs={24} sm={24} md={12} lg={8}>
-          <Input.Search placeholder="Search for user" />
+          <Input.Search
+            placeholder="Search for user"
+            allowClear
+            onChange={(event) => {
+              onFilterChange("UserSearchFilter", event.target.value);
+            }}
+          />
         </Col>
 
         <Col xs={24} sm={12} md={6} lg={3}>
@@ -19,6 +28,9 @@ function UsersFilter() {
               { value: "Customer", label: "CUSTOMER" },
             ]}
             allowClear
+            onChange={(selectedValue) => {
+              onFilterChange("UserRoleFilter", selectedValue);
+            }}
           />
         </Col>
 
@@ -31,6 +43,9 @@ function UsersFilter() {
               { value: "ACTIVE", label: "Active" },
             ]}
             allowClear
+            onChange={(selectedValue) => {
+              onFilterChange("UserStatusFilter", selectedValue);
+            }}
           />
         </Col>
 
