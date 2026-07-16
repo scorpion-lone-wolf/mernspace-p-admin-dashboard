@@ -1,33 +1,43 @@
-import { users } from "@/api/users.api";
-import { useAuthStore, type User } from "@/store";
+import { tenants } from "@/api/tenants.api";
+import { useAuthStore } from "@/store";
 import { PlusOutlined, RightOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Button, Drawer, Space, Table, type TableColumnsType } from "antd";
+import { Breadcrumb, Button, Drawer, Space, Table } from "antd";
 import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
-import UsersFilter from "./UsersFilter";
+import TenantFilter from "./TenantFilter";
 
-const columns: TableColumnsType<User> = [
-  { title: "Customer name", dataIndex: "firstName", key: "fullName", render: (_text, record) => record.firstName + " " + record.lastName },
-  { title: "Email", dataIndex: "email", key: "email" },
-  { title: "Role", dataIndex: "role", key: "role" },
-  { title: "Tenant", dataIndex: "tenant", key: "tenant", render: (text) => text?.name || "--" },
+const columns = [
+  {
+    title: "ID",
+    dataIndex: "id",
+    key: "id",
+  },
+  {
+    title: "Name",
+    dataIndex: "name",
+    key: "name",
+  },
+  {
+    title: "Address",
+    dataIndex: "address",
+    key: "address",
+  },
 ];
-
-function Users() {
-  function handleFilterChange(filterName: string, filterValue: string) {
-    console.log(filterName, filterValue);
-  }
+function handleFilterChange(filterName: string, filterValue: string) {
+  console.log(filterName, filterValue);
+}
+function Tenants() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { user, isAuthLoading } = useAuthStore();
   const {
-    data: userData,
+    data: tenantData,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["users"],
+    queryKey: ["tenants"],
     queryFn: async () => {
-      return (await users()).data;
+      return (await tenants()).data;
     },
   });
   if (isAuthLoading) {
@@ -36,6 +46,7 @@ function Users() {
   if (user?.role !== "ADMIN") {
     return <Navigate to="/" replace={true} />;
   }
+  console.log("tenantdata", tenantData);
 
   return (
     <Space vertical className="w-full" size="large">
@@ -48,7 +59,7 @@ function Users() {
           {
             title: (
               <strong>
-                <Link to="/users">users</Link>
+                <Link to="/resturants">Resturants</Link>
               </strong>
             ),
           },
@@ -58,7 +69,7 @@ function Users() {
       {isLoading && <div>Loading...</div>}
       {error && <div>{error.message}</div>}
       {/*  Add FIlters  */}
-      <UsersFilter onFilterChange={handleFilterChange}>
+      <TenantFilter onFilterChange={handleFilterChange}>
         <Button
           type="primary"
           size="large"
@@ -68,15 +79,15 @@ function Users() {
         >
           <Space>
             <PlusOutlined />
-            Create Users
+            Create Resturant
           </Space>
         </Button>
-      </UsersFilter>
+      </TenantFilter>
       {/* This is the users table */}
-      {userData && <Table columns={columns} dataSource={userData.data} rowKey={(record) => record.id} />}
+      {tenantData && <Table columns={columns} dataSource={tenantData.data} rowKey={"id"} />}
       {/* Drawer component for adding new users */}
       <Drawer
-        title="Create a new user"
+        title="Add a new Resturants"
         open={isDrawerOpen}
         size={720}
         destroyOnHidden={true}
@@ -96,4 +107,4 @@ function Users() {
   );
 }
 
-export default Users;
+export default Tenants;
