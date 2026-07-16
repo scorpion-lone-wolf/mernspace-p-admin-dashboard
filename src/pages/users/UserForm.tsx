@@ -80,7 +80,7 @@ function UserForm() {
                     allowClear
                     onChange={() => {}}
                     loading={isLoading}
-                    options={tenantData.data?.map((tenant: Tenant) => ({ value: tenant.id, label: tenant.name }))}
+                    options={tenantData?.data?.map((tenant: Tenant) => ({ value: tenant.id, label: tenant.name }))}
                     listHeight={50}
                   />
                 </Form.Item>
