@@ -2,9 +2,10 @@ import { users } from "@/api/users.api";
 import { useAuthStore, type User } from "@/store";
 import { PlusOutlined, RightOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Button, Drawer, Space, Table, type TableColumnsType } from "antd";
+import { Breadcrumb, Button, Drawer, Form, Space, Table, theme, type TableColumnsType } from "antd";
 import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
+import UserForm from "./UserForm";
 import UsersFilter from "./UsersFilter";
 
 const columns: TableColumnsType<User> = [
@@ -13,11 +14,11 @@ const columns: TableColumnsType<User> = [
   { title: "Role", dataIndex: "role", key: "role" },
   { title: "Tenant", dataIndex: "tenant", key: "tenant", render: (text) => text?.name || "--" },
 ];
-
+function handleFilterChange(filterName: string, filterValue: string) {
+  console.log(filterName, filterValue);
+}
 function Users() {
-  function handleFilterChange(filterName: string, filterValue: string) {
-    console.log(filterName, filterValue);
-  }
+  const { colorBgLayout } = theme.useToken().token;
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { user, isAuthLoading } = useAuthStore();
   const {
@@ -78,6 +79,11 @@ function Users() {
       <Drawer
         title="Create a new user"
         open={isDrawerOpen}
+        styles={{
+          body: {
+            background: colorBgLayout,
+          },
+        }}
         size={720}
         destroyOnHidden={true}
         onClose={() => {
@@ -91,7 +97,11 @@ function Users() {
             </Button>
           </Space>
         }
-      ></Drawer>
+      >
+        <Form layout="vertical">
+          <UserForm />
+        </Form>
+      </Drawer>
     </Space>
   );
 }
