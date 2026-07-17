@@ -24,17 +24,17 @@ function UserForm() {
           <Card title="Basic info">
             <Row gutter={18}>
               <Col span={12}>
-                <Form.Item name="firstName" label="First Name" rules={[{ required: true }, { type: "string", min: 6 }]}>
+                <Form.Item name="firstName" label="First Name" rules={[{ required: true }, { type: "string" }]}>
                   <Input placeholder="Enter your First Name" size="medium" />
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item name="lastName" label="Last Name" rules={[{ required: true }, { type: "string", min: 6 }]}>
+                <Form.Item name="lastName" label="Last Name" rules={[{ required: true }, { type: "string" }]}>
                   <Input placeholder="Enter your Last Name" size="medium" />
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item name="Email" label="Email" rules={[{ required: true }, { type: "email", min: 6 }]}>
+                <Form.Item name="email" label="Email" rules={[{ required: true }, { type: "email", min: 6 }]}>
                   <Input placeholder="Enter your Email" size="medium" />
                 </Form.Item>
               </Col>
@@ -49,7 +49,23 @@ function UserForm() {
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item name="confirmPassword" label="Confirm Password" rules={[{ required: true }, { type: "string", min: 6 }]}>
+                <Form.Item
+                  name="confirmPassword"
+                  label="Confirm Password"
+                  dependencies={["password"]}
+                  rules={[
+                    { required: true },
+                    { type: "string", min: 6 },
+                    ({ getFieldValue }) => ({
+                      validator(_, value) {
+                        if (value && getFieldValue("password") !== value) {
+                          return Promise.reject(new Error("The two passwords that you entered do not match!"));
+                        }
+                        return Promise.resolve();
+                      },
+                    }),
+                  ]}
+                >
                   <Input placeholder="Confirm your Password" size="medium" type="password" />
                 </Form.Item>
               </Col>

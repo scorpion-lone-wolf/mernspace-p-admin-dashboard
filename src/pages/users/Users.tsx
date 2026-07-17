@@ -1,7 +1,8 @@
-import { users } from "@/api/users.api";
-import { useAuthStore, type User } from "@/store";
+import { createUser, users } from "@/api/users.api";
+import { useAuthStore } from "@/store";
+import type { User } from "@/types";
 import { PlusOutlined, RightOutlined } from "@ant-design/icons";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Breadcrumb, Button, Drawer, Form, Space, Table, theme, type TableColumnsType } from "antd";
 import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
@@ -18,6 +19,8 @@ function handleFilterChange(filterName: string, filterValue: string) {
   console.log(filterName, filterValue);
 }
 function Users() {
+  const queryClient = useQueryClient();
+  const [form] = Form.useForm();
   const { colorBgLayout } = theme.useToken().token;
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { user, isAuthLoading } = useAuthStore();
@@ -31,12 +34,34 @@ function Users() {
       return (await users()).data;
     },
   });
+
+  const { mutate: createUserMutation } = useMutation({
+    mutationKey: ["users"],
+    mutationFn: async (user: User) => {
+      return await createUser(user);
+    },
+    onSuccess: () => {
+      // this will refetch the users data
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      setIsDrawerOpen(false);
+      form.resetFields();
+    },
+  });
   if (isAuthLoading) {
     return <div>Loading...</div>;
   }
   if (user?.role !== "ADMIN") {
     return <Navigate to="/" replace={true} />;
   }
+
+  const onHandleSubmit = async () => {
+    await form.validateFields();
+    const values = form.getFieldsValue();
+
+    const { firstName, lastName, email, role, password, tenantId } = values;
+    createUserMutation({ firstName, lastName, email, role, password, tenantId });
+    form.resetFields();
+  };
 
   return (
     <Space vertical className="w-full" size="large">
@@ -74,7 +99,7 @@ function Users() {
         </Button>
       </UsersFilter>
       {/* This is the users table */}
-      {userData && <Table columns={columns} dataSource={userData.data} rowKey={(record) => record.id} />}
+      {userData && <Table columns={columns} dataSource={userData.data} rowKey={"id"} />}
       {/* Drawer component for adding new users */}
       <Drawer
         title="Create a new user"
@@ -87,18 +112,32 @@ function Users() {
         size={720}
         destroyOnHidden={true}
         onClose={() => {
+          form.resetFields();
           setIsDrawerOpen(false);
         }}
         extra={
           <Space>
-            <Button onClick={() => {}}>Cancel</Button>
-            <Button onClick={() => {}} type="primary">
+            <Button
+              onClick={() => {
+                form.resetFields();
+                setIsDrawerOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={onHandleSubmit} type="primary">
               Submit
             </Button>
           </Space>
         }
       >
-        <Form layout="vertical">
+        <Form
+          layout="vertical"
+          form={form}
+          onFinish={() => {
+            console.log("Heere");
+          }}
+        >
           <UserForm />
         </Form>
       </Drawer>
