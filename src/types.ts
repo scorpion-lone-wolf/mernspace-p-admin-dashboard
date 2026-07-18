@@ -11,3 +11,8 @@ export type User = {
   password: string;
   tenantId?: string;
 };
+
+export type Tenant = {
+  name: string;
+  address: string;
+};
