@@ -97,7 +97,7 @@ function UserForm() {
                     onChange={() => {}}
                     loading={isLoading}
                     options={tenantData?.data?.map((tenant: Tenant) => ({ value: tenant.id, label: tenant.name }))}
-                    listHeight={50}
+                    listHeight={200}
                   />
                 </Form.Item>
               </Col>
