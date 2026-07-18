@@ -21,7 +21,7 @@ function handleFilterChange(filterName: string, filterValue: string) {
 function Users() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
-  const [limit] = useState(1);
+  const [limit] = useState(6);
   const [form] = Form.useForm();
   const { colorBgLayout } = theme.useToken().token;
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
