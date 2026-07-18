@@ -1,9 +1,9 @@
 import { createUser, users } from "@/api/users.api";
 import { useAuthStore } from "@/store";
 import type { User } from "@/types";
-import { PlusOutlined, RightOutlined } from "@ant-design/icons";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Breadcrumb, Button, Drawer, Form, Space, Table, theme, type TableColumnsType } from "antd";
+import { LoadingOutlined, PlusOutlined, RightOutlined } from "@ant-design/icons";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Breadcrumb, Button, Drawer, Flex, Form, Space, Spin, Table, theme, Typography, type TableColumnsType } from "antd";
 import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import UserForm from "./UserForm";
@@ -28,13 +28,14 @@ function Users() {
   const { user, isAuthLoading } = useAuthStore();
   const {
     data: userData,
-    isLoading,
+    isFetching,
     error,
   } = useQuery({
     queryKey: ["users", page, limit],
     queryFn: async () => {
       return (await users(page, limit)).data;
     },
+    placeholderData: keepPreviousData,
   });
 
   const { mutate: createUserMutation } = useMutation({
@@ -67,24 +68,26 @@ function Users() {
 
   return (
     <Space vertical className="w-full" size="large">
-      <Breadcrumb
-        separator={<RightOutlined />}
-        items={[
-          {
-            title: <Link to="/">Dashboard</Link>,
-          },
-          {
-            title: (
-              <strong>
-                <Link to="/users">users</Link>
-              </strong>
-            ),
-          },
-        ]}
-      />
+      <Flex justify="space-between">
+        <Breadcrumb
+          separator={<RightOutlined />}
+          items={[
+            {
+              title: <Link to="/">Dashboard</Link>,
+            },
+            {
+              title: (
+                <strong>
+                  <Link to="/users">users</Link>
+                </strong>
+              ),
+            },
+          ]}
+        />
+        {isFetching && <Spin indicator={<LoadingOutlined spin />} />}
+        {error && <Typography.Text type="danger">{error.message}</Typography.Text>}
+      </Flex>
 
-      {isLoading && <div>Loading...</div>}
-      {error && <div>{error.message}</div>}
       {/*  Add FIlters  */}
       <UsersFilter onFilterChange={handleFilterChange}>
         <Button
@@ -105,6 +108,7 @@ function Users() {
         <Table
           columns={columns}
           dataSource={userData.data}
+          loading={isFetching}
           rowKey={"id"}
           pagination={{
             current: page,
