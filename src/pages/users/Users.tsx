@@ -20,6 +20,8 @@ function handleFilterChange(filterName: string, filterValue: string) {
 }
 function Users() {
   const queryClient = useQueryClient();
+  const [page, setPage] = useState(1);
+  const [limit] = useState(1);
   const [form] = Form.useForm();
   const { colorBgLayout } = theme.useToken().token;
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -29,9 +31,9 @@ function Users() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["users"],
+    queryKey: ["users", page, limit],
     queryFn: async () => {
-      return (await users()).data;
+      return (await users(page, limit)).data;
     },
   });
 
@@ -99,7 +101,22 @@ function Users() {
         </Button>
       </UsersFilter>
       {/* This is the users table */}
-      {userData && <Table columns={columns} dataSource={userData.data} rowKey={"id"} />}
+      {userData && (
+        <Table
+          columns={columns}
+          dataSource={userData.data}
+          rowKey={"id"}
+          pagination={{
+            current: page,
+            pageSize: limit,
+            total: userData?.total ?? 0,
+            showSizeChanger: false,
+            onChange: (newPage) => {
+              setPage(newPage);
+            },
+          }}
+        />
+      )}
       {/* Drawer component for adding new users */}
       <Drawer
         title="Create a new user"
