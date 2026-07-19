@@ -135,6 +135,9 @@ function Tenants() {
             pageSize: limit,
             total: tenantData?.total ?? 0,
             showSizeChanger: false,
+            showTotal(total, range) {
+              return `${range[0]}-${range[1]} of ${total} items`;
+            },
             onChange: (newPage) => {
               setPage(newPage);
             },
