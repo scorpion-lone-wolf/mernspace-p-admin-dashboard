@@ -1,11 +1,12 @@
 import { createTenant, tenants } from "@/api/tenants.api";
 import { useAuthStore } from "@/store";
 import type { Tenant } from "@/types";
-import { PlusOutlined, RightOutlined } from "@ant-design/icons";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Breadcrumb, Button, Drawer, Form, Space, Table, theme } from "antd";
+import { LoadingOutlined, PlusOutlined, RightOutlined } from "@ant-design/icons";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Breadcrumb, Button, Drawer, Flex, Form, Space, Spin, Table, theme, Typography } from "antd";
 import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
+import { useDebouncedCallback } from "use-debounce";
 import TenantFilter from "./TenantFilter";
 import TenantForm from "./TenantForm";
 
@@ -26,24 +27,28 @@ const columns = [
     key: "address",
   },
 ];
-function handleFilterChange(filterName: string, filterValue: string) {
-  console.log(filterName, filterValue);
-}
 function Tenants() {
   const [form] = Form.useForm();
+  const [filterForm] = Form.useForm();
   const queryClient = useQueryClient();
+  const [page, setPage] = useState(1);
+  const [limit] = useState(6);
+  const [filters, setFilters] = useState({
+    search: "",
+  });
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { user, isAuthLoading } = useAuthStore();
   const { colorBgLayout } = theme.useToken().token;
   const {
     data: tenantData,
-    isLoading,
+    isFetching,
     error,
   } = useQuery({
-    queryKey: ["tenants"],
+    queryKey: ["tenants", page, limit, filters],
     queryFn: async () => {
-      return (await tenants()).data;
+      return (await tenants(page, limit, filters)).data;
     },
+    placeholderData: keepPreviousData,
   });
   const { mutate: createTenantMutation } = useMutation({
     mutationKey: ["tenants"],
@@ -64,51 +69,78 @@ function Tenants() {
     createTenantMutation(values);
   };
 
+  const onFilterChange = useDebouncedCallback(() => {
+    const values = filterForm.getFieldsValue();
+    setPage(1);
+    setFilters({
+      search: values.search,
+    });
+  }, 500);
+
   if (isAuthLoading) {
     return <div>Loading...</div>;
   }
   if (user?.role !== "ADMIN") {
     return <Navigate to="/" replace={true} />;
   }
-  console.log("tenantdata", tenantData);
 
   return (
     <Space vertical className="w-full" size="large">
-      <Breadcrumb
-        separator={<RightOutlined />}
-        items={[
-          {
-            title: <Link to="/">Dashboard</Link>,
-          },
-          {
-            title: (
-              <strong>
-                <Link to="/resturants">Resturants</Link>
-              </strong>
-            ),
-          },
-        ]}
-      />
+      <Flex justify="space-between">
+        <Breadcrumb
+          separator={<RightOutlined />}
+          items={[
+            {
+              title: <Link to="/">Dashboard</Link>,
+            },
+            {
+              title: (
+                <strong>
+                  <Link to="/resturants">Resturants</Link>
+                </strong>
+              ),
+            },
+          ]}
+        />
+        {isFetching && <Spin indicator={<LoadingOutlined spin />} />}
+        {error && <Typography.Text type="danger">{error.message}</Typography.Text>}
+      </Flex>
 
-      {isLoading && <div>Loading...</div>}
-      {error && <div>{error.message}</div>}
       {/*  Add FIlters  */}
-      <TenantFilter onFilterChange={handleFilterChange}>
-        <Button
-          type="primary"
-          size="large"
-          onClick={() => {
-            setIsDrawerOpen(true);
-          }}
-        >
-          <Space>
-            <PlusOutlined />
-            Create Resturant
-          </Space>
-        </Button>
-      </TenantFilter>
+      <Form form={filterForm} onFieldsChange={onFilterChange}>
+        <TenantFilter>
+          <Button
+            type="primary"
+            size="large"
+            onClick={() => {
+              setIsDrawerOpen(true);
+            }}
+          >
+            <Space>
+              <PlusOutlined />
+              Create Resturant
+            </Space>
+          </Button>
+        </TenantFilter>
+      </Form>
       {/* This is the users table */}
-      {tenantData && <Table columns={columns} dataSource={tenantData.data} rowKey={"id"} />}
+      {tenantData && (
+        <Table
+          columns={columns}
+          dataSource={tenantData.data}
+          loading={isFetching}
+          rowKey={"id"}
+          pagination={{
+            current: page,
+            pageSize: limit,
+            total: tenantData?.total ?? 0,
+            showSizeChanger: false,
+            onChange: (newPage) => {
+              setPage(newPage);
+            },
+          }}
+        />
+      )}
 
       {/* Drawer component for adding new users */}
       <Drawer

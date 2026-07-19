@@ -21,3 +21,7 @@ export type UserQueryFilter = {
   search?: string;
   role?: string;
 };
+
+export type TenantQueryFilter = {
+  search?: string;
+};
