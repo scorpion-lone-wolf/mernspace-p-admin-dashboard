@@ -56,6 +56,8 @@ function Users() {
   });
   const onFilterChange = useDebouncedCallback(() => {
     const values = filterForm.getFieldsValue();
+    // set page back to 1 before applying filters
+    setPage(1);
     setFilters({
       search: values.search,
       role: values.role,
