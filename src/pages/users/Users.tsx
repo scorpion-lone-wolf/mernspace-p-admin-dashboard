@@ -6,6 +6,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 import { Breadcrumb, Button, Drawer, Flex, Form, Space, Spin, Table, theme, Typography, type TableColumnsType } from "antd";
 import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
+import { useDebouncedCallback } from "use-debounce";
 import UserForm from "./UserForm";
 import UsersFilter from "./UsersFilter";
 
@@ -15,14 +16,17 @@ const columns: TableColumnsType<User> = [
   { title: "Role", dataIndex: "role", key: "role" },
   { title: "Tenant", dataIndex: "tenant", key: "tenant", render: (text) => text?.name || "--" },
 ];
-function handleFilterChange(filterName: string, filterValue: string) {
-  console.log(filterName, filterValue);
-}
+
 function Users() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [limit] = useState(6);
+  const [filters, setFilters] = useState({
+    search: "",
+    role: "",
+  });
   const [form] = Form.useForm();
+  const [filterForm] = Form.useForm();
   const { colorBgLayout } = theme.useToken().token;
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { user, isAuthLoading } = useAuthStore();
@@ -31,9 +35,9 @@ function Users() {
     isFetching,
     error,
   } = useQuery({
-    queryKey: ["users", page, limit],
+    queryKey: ["users", page, limit, filters],
     queryFn: async () => {
-      return (await users(page, limit)).data;
+      return (await users(page, limit, filters)).data;
     },
     placeholderData: keepPreviousData,
   });
@@ -50,6 +54,13 @@ function Users() {
       form.resetFields();
     },
   });
+  const onFilterChange = useDebouncedCallback(() => {
+    const values = filterForm.getFieldsValue();
+    setFilters({
+      search: values.search,
+      role: values.role,
+    });
+  }, 500);
   if (isAuthLoading) {
     return <div>Loading...</div>;
   }
@@ -89,20 +100,22 @@ function Users() {
       </Flex>
 
       {/*  Add FIlters  */}
-      <UsersFilter onFilterChange={handleFilterChange}>
-        <Button
-          type="primary"
-          size="large"
-          onClick={() => {
-            setIsDrawerOpen(true);
-          }}
-        >
-          <Space>
-            <PlusOutlined />
-            Create Users
-          </Space>
-        </Button>
-      </UsersFilter>
+      <Form form={filterForm} onFieldsChange={onFilterChange}>
+        <UsersFilter>
+          <Button
+            type="primary"
+            size="large"
+            onClick={() => {
+              setIsDrawerOpen(true);
+            }}
+          >
+            <Space>
+              <PlusOutlined />
+              Create Users
+            </Space>
+          </Button>
+        </UsersFilter>
+      </Form>
       {/* This is the users table */}
       {userData && (
         <Table

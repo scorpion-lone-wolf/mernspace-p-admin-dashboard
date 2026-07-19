@@ -16,3 +16,8 @@ export type Tenant = {
   name: string;
   address: string;
 };
+
+export type UserQueryFilter = {
+  search?: string;
+  role?: string;
+};
