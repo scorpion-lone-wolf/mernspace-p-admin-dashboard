@@ -37,7 +37,7 @@ function Tenants() {
     search: "",
   });
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const { user, isAuthLoading } = useAuthStore();
+  const { user } = useAuthStore();
   const { colorBgLayout } = theme.useToken().token;
   const {
     data: tenantData,
@@ -77,9 +77,6 @@ function Tenants() {
     });
   }, 500);
 
-  if (isAuthLoading) {
-    return <div>Loading...</div>;
-  }
   if (user?.role !== "ADMIN") {
     return <Navigate to="/" replace={true} />;
   }

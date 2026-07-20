@@ -1,4 +1,5 @@
 import { me } from "@/api/auth.api";
+import Spinner from "@/components/Spinner";
 import { useAuthStore } from "@/store";
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -31,7 +32,7 @@ function Root() {
   }, [data, setUser]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Spinner />;
   }
   return <Outlet />;
 }

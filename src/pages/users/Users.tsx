@@ -1,4 +1,5 @@
 import { createUser, users } from "@/api/users.api";
+import Spinner from "@/components/Spinner";
 import { useAuthStore } from "@/store";
 import type { User } from "@/types";
 import { LoadingOutlined, PlusOutlined, RightOutlined } from "@ant-design/icons";
@@ -64,7 +65,7 @@ function Users() {
     });
   }, 500);
   if (isAuthLoading) {
-    return <div>Loading...</div>;
+    return <Spinner />;
   }
   if (user?.role !== "ADMIN") {
     return <Navigate to="/" replace={true} />;
