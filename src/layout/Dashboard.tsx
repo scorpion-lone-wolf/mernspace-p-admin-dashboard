@@ -68,7 +68,7 @@ function Dashboard() {
   if (!user) {
     // user is not logged in
     // redirect to login page
-    return <Navigate to="/auth/login" replace={true} />;
+    return <Navigate to={`/auth/login?returnTo=${location.pathname}`} replace={true} />;
   }
   return (
     <div>

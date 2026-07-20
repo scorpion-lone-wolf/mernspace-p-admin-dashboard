@@ -6,7 +6,7 @@ import type { Credentails } from "@/types";
 import { LockFilled, LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Alert, Button, Card, Checkbox, Flex, Form, Input, Layout, Space } from "antd";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const loginUser = async (credentails: Credentails) => {
   // here we make the request to the server to mutate the data
@@ -20,6 +20,8 @@ const getMe = async () => {
 };
 
 function LoginPage() {
+  const location = useLocation();
+  console.log("loc", location.pathname);
   const { isAllowed } = usePermissions();
   const { setUser, logout: logoutFromStore } = useAuthStore();
   const navigate = useNavigate();
@@ -51,7 +53,6 @@ function LoginPage() {
     mutationKey: ["login"],
     mutationFn: loginUser,
     onSuccess: async () => {
-      console.log("Calling on success");
       const userData = await refetch();
       // hook that checks if user is admin or manager else not allowed
       if (!isAllowed(userData.data.data.at(0))) {
@@ -60,7 +61,9 @@ function LoginPage() {
       }
       // store the user data in store
       setUser(userData.data.data.at(0));
-      navigate("/", { replace: true });
+      const params = new URLSearchParams(location.search);
+      const returnTo = params.get("returnTo") || "/";
+      navigate(returnTo, { replace: true });
     },
   });
 
