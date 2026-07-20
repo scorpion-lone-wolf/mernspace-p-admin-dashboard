@@ -23,11 +23,6 @@ const getMenuItems = (role: string) => {
     },
 
     {
-      key: "/resturants",
-      label: <NavLink to="/resturants">Resturants</NavLink>,
-      icon: <Icon component={foodIcon} />,
-    },
-    {
       key: "/products",
       label: <NavLink to="/products">Products</NavLink>,
       icon: <Icon component={BasketIcon} />,
@@ -44,6 +39,11 @@ const getMenuItems = (role: string) => {
       label: <NavLink to="/users">Users</NavLink>,
       icon: <Icon component={UserIcon} />,
     });
+    baseItems.splice(2, 0, {
+      key: "/resturants",
+      label: <NavLink to="/resturants">Resturants</NavLink>,
+      icon: <Icon component={foodIcon} />,
+    });
   }
   return baseItems;
 };
@@ -56,7 +56,7 @@ function Dashboard() {
   } = theme.useToken();
   // This will decide if the below protected route should be rendered or not
   // We will check the store, if we have user data , then user is authenticated and allowed to see this page else not (we will redirect them to login page)
-  const { user, isAuthLoading, logout: logoutFromState } = useAuthStore();
+  const { user, logout: logoutFromState } = useAuthStore();
   const { mutate } = useMutation({
     mutationKey: ["logout"],
     mutationFn: logout,
@@ -64,10 +64,6 @@ function Dashboard() {
       logoutFromState();
     },
   });
-
-  if (isAuthLoading) {
-    return <div>Loading...</div>;
-  }
 
   if (!user) {
     // user is not logged in

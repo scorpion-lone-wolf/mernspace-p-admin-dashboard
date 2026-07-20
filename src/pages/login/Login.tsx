@@ -29,6 +29,7 @@ function LoginPage() {
     queryKey: ["user"],
     queryFn: getMe,
     enabled: false, // at the starting it will not run when the page loads
+    retry: false,
   });
 
   // logout mutation
@@ -50,6 +51,7 @@ function LoginPage() {
     mutationKey: ["login"],
     mutationFn: loginUser,
     onSuccess: async () => {
+      console.log("Calling on success");
       const userData = await refetch();
       // hook that checks if user is admin or manager else not allowed
       if (!isAllowed(userData.data.data.at(0))) {

@@ -2,11 +2,7 @@ import { useAuthStore } from "@/store";
 import { Navigate, Outlet } from "react-router-dom";
 
 function NonAuth() {
-  const { user, isAuthLoading } = useAuthStore();
-
-  if (isAuthLoading) {
-    return <div>Loading...</div>;
-  }
+  const { user } = useAuthStore();
 
   if (user) {
     // user is already logged in

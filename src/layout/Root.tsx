@@ -10,10 +10,13 @@ const getMe = async () => {
   return response.data;
 };
 function Root() {
-  const { setUser, setAuthLoading } = useAuthStore();
-  const { data, isLoading, isFetched } = useQuery({
+  // const location = useLocation();
+  // const isAuthPage = location.pathname.startsWith("/auth");
+  const { setUser } = useAuthStore();
+  const { data, isLoading } = useQuery({
     queryKey: ["user"],
     queryFn: getMe,
+    // enabled: !isAuthPage,
     retry: (failureCount, error) => {
       if (error instanceof AxiosError && error?.response?.status === 401) {
         return false;
@@ -26,10 +29,6 @@ function Root() {
       setUser(data.data.at(0));
     }
   }, [data, setUser]);
-
-  useEffect(() => {
-    setAuthLoading(isLoading || !isFetched);
-  }, [isFetched, isLoading, setAuthLoading]);
 
   if (isLoading) {
     return <div>Loading...</div>;

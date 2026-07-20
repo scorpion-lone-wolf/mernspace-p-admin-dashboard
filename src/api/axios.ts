@@ -27,18 +27,27 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (!originalRequest) {
+      return Promise.reject(error);
+    }
+
+    const url = originalRequest.url ?? "";
+
+    const isAuthRequest = url.includes("/auth/login") || url.includes("/auth/logout") || url.includes("/auth/refresh");
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthRequest) {
       originalRequest._retry = true;
+
       try {
         await refreshToken();
-        // retry the original request
         return api(originalRequest);
       } catch (refreshError) {
         useAuthStore.getState().logout();
-        throw refreshError;
+        return Promise.reject(refreshError);
       }
     }
-    return error;
+
+    return Promise.reject(error);
   },
 );
 
