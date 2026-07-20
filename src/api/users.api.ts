@@ -1,4 +1,4 @@
-import type { User, UserQueryFilter } from "@/types";
+import type { CreateUserPayload, UpdateUserPayload, UserQueryFilter } from "@/types";
 import api from "./axios";
 
 export const users = async (page: number, limit: number, filters: UserQueryFilter) => {
@@ -11,4 +11,5 @@ export const users = async (page: number, limit: number, filters: UserQueryFilte
     },
   });
 };
-export const createUser = async (user: User) => await api.post("/users", user);
+export const createUser = async (user: CreateUserPayload) => await api.post("/users", user);
+export const updateUser = async (id: string, user: UpdateUserPayload) => await api.patch(`/users/${id}`, user);

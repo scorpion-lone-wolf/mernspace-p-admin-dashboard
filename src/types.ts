@@ -3,7 +3,27 @@ export type Credentails = {
   password: string;
 };
 
+export type Tenant = {
+  id: string;
+  name: string;
+  address: string;
+};
+
+export type CreateTenantPayload = {
+  name: string;
+  address: string;
+};
+
 export type User = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  tenant?: Tenant;
+};
+
+export type CreateUserPayload = {
   firstName: string;
   lastName: string;
   email: string;
@@ -12,10 +32,7 @@ export type User = {
   tenantId?: string;
 };
 
-export type Tenant = {
-  name: string;
-  address: string;
-};
+export type UpdateUserPayload = Partial<CreateUserPayload>;
 
 export type UserQueryFilter = {
   search?: string;

@@ -1,11 +1,10 @@
-import { createUser, users } from "@/api/users.api";
-import Spinner from "@/components/Spinner";
+import { createUser, updateUser, users } from "@/api/users.api";
 import { useAuthStore } from "@/store";
-import type { User } from "@/types";
+import type { CreateUserPayload, UpdateUserPayload, User } from "@/types";
 import { LoadingOutlined, PlusOutlined, RightOutlined } from "@ant-design/icons";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Breadcrumb, Button, Drawer, Flex, Form, Space, Spin, Table, theme, Typography, type TableColumnsType } from "antd";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useDebouncedCallback } from "use-debounce";
 import UserForm from "./UserForm";
@@ -20,8 +19,10 @@ const columns: TableColumnsType<User> = [
 
 function Users() {
   const queryClient = useQueryClient();
+  const [editableUser, setEditableUser] = useState<User | null>(null);
   const [page, setPage] = useState(1);
   const [limit] = useState(6);
+  const { user } = useAuthStore();
   const [filters, setFilters] = useState({
     search: "",
     role: "",
@@ -30,7 +31,25 @@ function Users() {
   const [filterForm] = Form.useForm();
   const { colorBgLayout } = theme.useToken().token;
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const { user, isAuthLoading } = useAuthStore();
+
+  const closeDrawer = () => {
+    form.resetFields();
+    setEditableUser(null);
+    setIsDrawerOpen(false);
+  };
+
+  React.useEffect(() => {
+    if (editableUser) {
+      form.setFieldsValue({
+        firstName: editableUser.firstName,
+        lastName: editableUser.lastName,
+        email: editableUser.email,
+        role: editableUser.role,
+        tenantId: editableUser.tenant?.id,
+      });
+    }
+  }, [editableUser, form]);
+
   const {
     data: userData,
     isFetching,
@@ -43,16 +62,25 @@ function Users() {
     placeholderData: keepPreviousData,
   });
 
-  const { mutate: createUserMutation } = useMutation({
+  const { mutate: createUserMutation, isPending: isCreateUserPending } = useMutation({
     mutationKey: ["users"],
-    mutationFn: async (user: User) => {
+    mutationFn: async (user: CreateUserPayload) => {
       return await createUser(user);
     },
     onSuccess: () => {
       // this will refetch the users data
       queryClient.invalidateQueries({ queryKey: ["users"] });
-      setIsDrawerOpen(false);
-      form.resetFields();
+      closeDrawer();
+    },
+  });
+  const { mutate: updateUserMutation, isPending: isUpdateUserPending } = useMutation({
+    mutationKey: ["users", editableUser?.id],
+    mutationFn: async ({ id, user }: { id: string; user: UpdateUserPayload }) => {
+      return await updateUser(id, user);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      closeDrawer();
     },
   });
   const onFilterChange = useDebouncedCallback(() => {
@@ -64,9 +92,7 @@ function Users() {
       role: values.role,
     });
   }, 500);
-  if (isAuthLoading) {
-    return <Spinner />;
-  }
+
   if (user?.role !== "ADMIN") {
     return <Navigate to="/" replace={true} />;
   }
@@ -76,8 +102,18 @@ function Users() {
     const values = form.getFieldsValue();
 
     const { firstName, lastName, email, role, password, tenantId } = values;
+    if (editableUser) {
+      const updatePayload: UpdateUserPayload = { firstName, lastName, email, role, tenantId };
+
+      if (password) {
+        updatePayload.password = password;
+      }
+
+      updateUserMutation({ id: editableUser.id, user: updatePayload });
+      return;
+    }
+
     createUserMutation({ firstName, lastName, email, role, password, tenantId });
-    form.resetFields();
   };
 
   return (
@@ -109,6 +145,8 @@ function Users() {
             type="primary"
             size="large"
             onClick={() => {
+              form.resetFields();
+              setEditableUser(null);
               setIsDrawerOpen(true);
             }}
           >
@@ -122,7 +160,37 @@ function Users() {
       {/* This is the users table */}
       {userData && (
         <Table
-          columns={columns}
+          columns={[
+            ...columns,
+            {
+              title: "Action",
+              key: "actions",
+              render: (_text: string, record: User) => {
+                return (
+                  <Space>
+                    <Button
+                      type="link"
+                      onClick={() => {
+                        setEditableUser(record);
+                        setIsDrawerOpen(true);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    {/* <Button
+                      type="link"
+                      onClick={() => {
+                        console.log("Delete");
+                        console.log(record);
+                      }}
+                    >
+                      Delete
+                    </Button> */}
+                  </Space>
+                );
+              },
+            },
+          ]}
           dataSource={userData.data}
           loading={isFetching}
           rowKey={"id"}
@@ -142,7 +210,7 @@ function Users() {
       )}
       {/* Drawer component for adding new users */}
       <Drawer
-        title="Create a new user"
+        title={editableUser ? "Edit user" : "Create a new user"}
         open={isDrawerOpen}
         styles={{
           body: {
@@ -151,34 +219,18 @@ function Users() {
         }}
         size={720}
         destroyOnHidden={true}
-        onClose={() => {
-          form.resetFields();
-          setIsDrawerOpen(false);
-        }}
+        onClose={closeDrawer}
         extra={
           <Space>
-            <Button
-              onClick={() => {
-                form.resetFields();
-                setIsDrawerOpen(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button onClick={onHandleSubmit} type="primary">
-              Submit
+            <Button onClick={closeDrawer}>Cancel</Button>
+            <Button onClick={onHandleSubmit} type="primary" loading={isCreateUserPending || isUpdateUserPending}>
+              {editableUser ? "Update" : "Submit"}
             </Button>
           </Space>
         }
       >
-        <Form
-          layout="vertical"
-          form={form}
-          onFinish={() => {
-            console.log("Heere");
-          }}
-        >
-          <UserForm />
+        <Form layout="vertical" form={form}>
+          <UserForm isEditMode={Boolean(editableUser)} />
         </Form>
       </Drawer>
     </Space>
@@ -186,3 +238,8 @@ function Users() {
 }
 
 export default Users;
+// Steps to edit a user
+// 1. get the user data from the table actiom
+// 2. save on state inside the container
+// 3. open the drawer
+// 4. prefill the form with the user data

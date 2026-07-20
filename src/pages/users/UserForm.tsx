@@ -3,7 +3,11 @@ import type { Tenant } from "@/store";
 import { useQuery } from "@tanstack/react-query";
 import { Card, Col, Form, Input, Row, Select, Space } from "antd";
 
-function UserForm() {
+type UserFormProps = {
+  isEditMode?: boolean;
+};
+
+function UserForm({ isEditMode = false }: UserFormProps) {
   const {
     data: tenantData,
     isLoading,
@@ -44,7 +48,7 @@ function UserForm() {
           <Card title="Security info">
             <Row gutter={18}>
               <Col span={12}>
-                <Form.Item name="password" label="Password" rules={[{ required: true }, { type: "string", min: 6 }]}>
+                <Form.Item name="password" label="Password" rules={[{ required: !isEditMode }, { type: "string", min: 6 }]}>
                   <Input placeholder="Add your Password" size="medium" type="password" />
                 </Form.Item>
               </Col>
@@ -54,11 +58,15 @@ function UserForm() {
                   label="Confirm Password"
                   dependencies={["password"]}
                   rules={[
-                    { required: true },
+                    { required: !isEditMode },
                     { type: "string", min: 6 },
                     ({ getFieldValue }) => ({
                       validator(_, value) {
-                        if (value && getFieldValue("password") !== value) {
+                        const password = getFieldValue("password");
+                        if (!password && isEditMode) {
+                          return Promise.resolve();
+                        }
+                        if (password !== value) {
                           return Promise.reject(new Error("The two passwords that you entered do not match!"));
                         }
                         return Promise.resolve();
