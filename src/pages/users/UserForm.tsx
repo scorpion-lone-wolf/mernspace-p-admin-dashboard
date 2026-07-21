@@ -8,6 +8,7 @@ type UserFormProps = {
 };
 
 function UserForm({ isEditMode = false }: Readonly<UserFormProps>) {
+  const role = Form.useWatch("role");
   const {
     data: tenantData,
     isLoading,
@@ -89,27 +90,27 @@ function UserForm({ isEditMode = false }: Readonly<UserFormProps>) {
                     placeholder="Select Role"
                     size="medium"
                     allowClear
-                    onChange={() => {}}
                     options={[
                       { value: "ADMIN", label: "Admin" },
                       { value: "MANAGER", label: "Manager" },
-                      { value: "CUSTOMER", label: "Customer" },
                     ]}
                   />
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item name="tenantId" label="Resturant" rules={[{ required: true }, { type: "string" }]}>
-                  <Select
-                    placeholder="Select Resturant"
-                    size="medium"
-                    allowClear
-                    onChange={() => {}}
-                    loading={isLoading}
-                    options={tenantData?.data?.map((tenant: Tenant) => ({ value: tenant.id, label: tenant.name }))}
-                    listHeight={200}
-                  />
-                </Form.Item>
+                {role !== "ADMIN" && (
+                  <Form.Item name="tenantId" label="Resturant" rules={[{ required: true }, { type: "string" }]}>
+                    <Select
+                      placeholder="Select Resturant"
+                      size="medium"
+                      allowClear
+                      onChange={() => {}}
+                      loading={isLoading}
+                      options={tenantData?.data?.map((tenant: Tenant) => ({ value: tenant.id, label: tenant.name }))}
+                      listHeight={200}
+                    />
+                  </Form.Item>
+                )}
               </Col>
             </Row>
           </Card>
