@@ -33,6 +33,7 @@ export type CreateUserPayload = {
 };
 
 export type UpdateUserPayload = Partial<CreateUserPayload>;
+export type UpdateTenantPayload = Partial<CreateTenantPayload>;
 
 export type UserQueryFilter = {
   search?: string;

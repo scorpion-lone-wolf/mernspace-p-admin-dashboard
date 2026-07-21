@@ -1,4 +1,4 @@
-import type { CreateTenantPayload, TenantQueryFilter } from "@/types";
+import type { CreateTenantPayload, TenantQueryFilter, UpdateTenantPayload } from "@/types";
 import api from "./axios";
 
 export const tenants = async (page?: number, limit?: number, filters?: TenantQueryFilter) => {
@@ -11,3 +11,4 @@ export const tenants = async (page?: number, limit?: number, filters?: TenantQue
   });
 };
 export const createTenant = async (tenant: CreateTenantPayload) => await api.post("/tenants", tenant);
+export const updateTenant = async (tenant: UpdateTenantPayload, id: string) => await api.patch("/tenants/" + id, tenant);

@@ -1,10 +1,10 @@
-import { createTenant, tenants } from "@/api/tenants.api";
+import { createTenant, tenants, updateTenant } from "@/api/tenants.api";
 import { useAuthStore } from "@/store";
-import type { Tenant } from "@/types";
+import type { Tenant, UpdateTenantPayload } from "@/types";
 import { LoadingOutlined, PlusOutlined, RightOutlined } from "@ant-design/icons";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Breadcrumb, Button, Drawer, Flex, Form, Space, Spin, Table, theme, Typography } from "antd";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useDebouncedCallback } from "use-debounce";
 import TenantFilter from "./TenantFilter";
@@ -30,6 +30,7 @@ const columns = [
 function Tenants() {
   const [form] = Form.useForm();
   const [filterForm] = Form.useForm();
+  const [editableTenant, setEditableTenant] = useState<UpdateTenantPayload | null>(null);
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [limit] = useState(6);
@@ -39,6 +40,22 @@ function Tenants() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { user } = useAuthStore();
   const { colorBgLayout } = theme.useToken().token;
+
+  React.useEffect(() => {
+    if (editableTenant) {
+      form.setFieldsValue({
+        name: editableTenant.name,
+        address: editableTenant.address,
+      });
+    }
+  }, [editableTenant, form]);
+
+  const clearDrawer = () => {
+    form.resetFields();
+    setEditableTenant(null);
+    setIsDrawerOpen(false);
+  };
+
   const {
     data: tenantData,
     isFetching,
@@ -50,10 +67,12 @@ function Tenants() {
     },
     placeholderData: keepPreviousData,
   });
-  const { mutate: createTenantMutation } = useMutation({
+
+  const { mutate: updateTenantMutation } = useMutation({
     mutationKey: ["tenants"],
     mutationFn: async (tenant: Tenant) => {
-      return await createTenant(tenant);
+      const id = tenant.id;
+      return await updateTenant({ ...tenant }, id);
     },
     onSuccess: () => {
       // this will refetch the tenants data
@@ -63,9 +82,29 @@ function Tenants() {
     },
   });
 
+  const { mutate: createTenantMutation } = useMutation({
+    mutationKey: ["tenants"],
+    mutationFn: async (tenant: Tenant) => {
+      return await createTenant(tenant);
+    },
+    onSuccess: () => {
+      // this will refetch the tenants data
+      queryClient.invalidateQueries({ queryKey: ["tenants"] });
+      setIsDrawerOpen(false);
+
+      form.resetFields();
+    },
+  });
+
   const onFormSubmit = async () => {
     await form.validateFields();
     const values = form.getFieldsValue();
+    // check if we are editing or adding new Resturant/Tenant
+    if (editableTenant) {
+      updateTenantMutation({ ...editableTenant, ...values });
+      return;
+    }
+    // creating a new resturant
     createTenantMutation(values);
   };
 
@@ -123,7 +162,28 @@ function Tenants() {
       {/* This is the users table */}
       {tenantData && (
         <Table
-          columns={columns}
+          columns={[
+            ...columns,
+            {
+              title: "Action",
+              key: "action",
+              render: (_, record: UpdateTenantPayload) => {
+                return (
+                  <Space>
+                    <Button
+                      type="link"
+                      onClick={() => {
+                        setEditableTenant(record);
+                        setIsDrawerOpen(true);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                  </Space>
+                );
+              },
+            },
+          ]}
           dataSource={tenantData.data}
           loading={isFetching}
           rowKey={"id"}
@@ -144,19 +204,19 @@ function Tenants() {
 
       {/* Drawer component for adding new users */}
       <Drawer
-        title="Add a new Resturants"
+        title={editableTenant ? "Edit Resturant" : "Add a new Resturants"}
         open={isDrawerOpen}
         size={720}
         styles={{ body: { background: colorBgLayout } }}
         destroyOnHidden={true}
         onClose={() => {
-          setIsDrawerOpen(false);
+          clearDrawer();
         }}
         extra={
           <Space>
             <Button
               onClick={() => {
-                setIsDrawerOpen(false);
+                clearDrawer();
               }}
             >
               Cancel
