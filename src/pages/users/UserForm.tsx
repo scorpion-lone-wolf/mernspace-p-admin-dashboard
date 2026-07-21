@@ -7,7 +7,7 @@ type UserFormProps = {
   isEditMode?: boolean;
 };
 
-function UserForm({ isEditMode = false }: UserFormProps) {
+function UserForm({ isEditMode = false }: Readonly<UserFormProps>) {
   const {
     data: tenantData,
     isLoading,
@@ -45,40 +45,42 @@ function UserForm({ isEditMode = false }: UserFormProps) {
             </Row>
           </Card>
 
-          <Card title="Security info">
-            <Row gutter={18}>
-              <Col span={12}>
-                <Form.Item name="password" label="Password" rules={[{ required: !isEditMode }, { type: "string", min: 6 }]}>
-                  <Input placeholder="Add your Password" size="medium" type="password" />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  name="confirmPassword"
-                  label="Confirm Password"
-                  dependencies={["password"]}
-                  rules={[
-                    { required: !isEditMode },
-                    { type: "string", min: 6 },
-                    ({ getFieldValue }) => ({
-                      validator(_, value) {
-                        const password = getFieldValue("password");
-                        if (!password && isEditMode) {
+          {!isEditMode && (
+            <Card title="Security info">
+              <Row gutter={18}>
+                <Col span={12}>
+                  <Form.Item name="password" label="Password" rules={[{ required: !isEditMode }, { type: "string", min: 6 }]}>
+                    <Input placeholder="Add your Password" size="medium" type="password" />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    name="confirmPassword"
+                    label="Confirm Password"
+                    dependencies={["password"]}
+                    rules={[
+                      { required: !isEditMode },
+                      { type: "string", min: 6 },
+                      ({ getFieldValue }) => ({
+                        validator(_, value) {
+                          const password = getFieldValue("password");
+                          if (!password && isEditMode) {
+                            return Promise.resolve();
+                          }
+                          if (password !== value) {
+                            return Promise.reject(new Error("The two passwords that you entered do not match!"));
+                          }
                           return Promise.resolve();
-                        }
-                        if (password !== value) {
-                          return Promise.reject(new Error("The two passwords that you entered do not match!"));
-                        }
-                        return Promise.resolve();
-                      },
-                    }),
-                  ]}
-                >
-                  <Input placeholder="Confirm your Password" size="medium" type="password" />
-                </Form.Item>
-              </Col>
-            </Row>
-          </Card>
+                        },
+                      }),
+                    ]}
+                  >
+                    <Input placeholder="Confirm your Password" size="medium" type="password" />
+                  </Form.Item>
+                </Col>
+              </Row>
+            </Card>
+          )}
           <Card title="Roles info">
             <Row gutter={18}>
               <Col span={12}>
