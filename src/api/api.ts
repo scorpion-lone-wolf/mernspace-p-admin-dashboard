@@ -10,14 +10,14 @@ import type {
 import api from "./axios";
 
 export const AUTH_SERVICE = "/api/auth";
-// const CATALOG_SERVICE = "/api/catalog";
+const CATALOG_SERVICE = "/api/catalog";
 
 // === Auth Service ===
 export const login = async (credentials: Credentails) => await api.post(`${AUTH_SERVICE}/auth/login`, credentials);
 export const me = async () => await api.get(`${AUTH_SERVICE}/auth/me`);
 export const logout = async () => await api.post(`${AUTH_SERVICE}/auth/logout`);
 
-export const tenants = async (page?: number, limit?: number, filters?: TenantQueryFilter) => {
+export const getTenants = async (page?: number, limit?: number, filters?: TenantQueryFilter) => {
   return await api.get(`${AUTH_SERVICE}/tenants`, {
     params: {
       ...(page ? { page } : {}),
@@ -29,7 +29,7 @@ export const tenants = async (page?: number, limit?: number, filters?: TenantQue
 export const createTenant = async (tenant: CreateTenantPayload) => await api.post(`${AUTH_SERVICE}/tenants`, tenant);
 export const updateTenant = async (tenant: UpdateTenantPayload, id: string) => await api.patch(`${AUTH_SERVICE}/tenants/${id}`, tenant);
 
-export const users = async (page: number, limit: number, filters: UserQueryFilter) => {
+export const getUsers = async (page: number, limit: number, filters: UserQueryFilter) => {
   return await api.get(`${AUTH_SERVICE}/users`, {
     params: {
       page,
@@ -43,3 +43,5 @@ export const createUser = async (user: CreateUserPayload) => await api.post(`${A
 export const updateUser = async (id: string, user: UpdateUserPayload) => await api.patch(`${AUTH_SERVICE}/users/${id}`, user);
 
 // === Catalog  Service ===
+
+export const getCategories = async () => await api.get(`${CATALOG_SERVICE}/categories`);

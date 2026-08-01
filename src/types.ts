@@ -43,3 +43,18 @@ export type UserQueryFilter = {
 export type TenantQueryFilter = {
   search?: string;
 };
+
+export type Category = {
+  _id: string;
+  name: string;
+  attributes: {
+    name: string;
+    widgetType: string;
+    defaultValue: string;
+    availableOptions: string[];
+  }[];
+  priceConfigurations: {
+    priceType: string;
+    availableOptions: number[];
+  }[];
+};

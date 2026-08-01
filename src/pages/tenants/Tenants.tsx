@@ -1,4 +1,4 @@
-import { createTenant, tenants, updateTenant } from "@/api/api";
+import { createTenant, getTenants, updateTenant } from "@/api/api";
 import { useAuthStore } from "@/store";
 import type { Tenant, UpdateTenantPayload } from "@/types";
 import { LoadingOutlined, PlusOutlined, RightOutlined } from "@ant-design/icons";
@@ -63,7 +63,7 @@ function Tenants() {
   } = useQuery({
     queryKey: ["tenants", page, limit, filters],
     queryFn: async () => {
-      return (await tenants(page, limit, filters)).data;
+      return (await getTenants(page, limit, filters)).data;
     },
     placeholderData: keepPreviousData,
   });

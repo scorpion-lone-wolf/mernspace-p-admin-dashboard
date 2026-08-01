@@ -1,4 +1,4 @@
-import { tenants } from "@/api/api";
+import { getTenants } from "@/api/api";
 import type { Tenant } from "@/store";
 import { useQuery } from "@tanstack/react-query";
 import { Card, Col, Form, Input, Row, Select, Space } from "antd";
@@ -16,7 +16,7 @@ function UserForm({ isEditMode = false }: Readonly<UserFormProps>) {
   } = useQuery({
     queryKey: ["tenants"],
     queryFn: async () => {
-      return (await tenants()).data;
+      return (await getTenants()).data;
     },
   });
   if (error) {

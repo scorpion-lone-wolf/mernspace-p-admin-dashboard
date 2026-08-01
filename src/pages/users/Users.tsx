@@ -1,4 +1,4 @@
-import { createUser, updateUser, users } from "@/api/api";
+import { createUser, getUsers, updateUser } from "@/api/api";
 import { useAuthStore } from "@/store";
 import type { CreateUserPayload, UpdateUserPayload, User } from "@/types";
 import { LoadingOutlined, PlusOutlined, RightOutlined } from "@ant-design/icons";
@@ -57,7 +57,7 @@ function Users() {
   } = useQuery({
     queryKey: ["users", page, limit, filters],
     queryFn: async () => {
-      return (await users(page, limit, filters)).data;
+      return (await getUsers(page, limit, filters)).data;
     },
     placeholderData: keepPreviousData,
   });
