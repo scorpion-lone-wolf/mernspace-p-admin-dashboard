@@ -1,4 +1,4 @@
-import { login, logout, me } from "@/api/auth-service/auth.api";
+import { login, logout, me } from "@/api/api";
 import LogoIcon from "@/components/icons/LogoIcon";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useAuthStore } from "@/store";

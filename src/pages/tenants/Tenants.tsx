@@ -1,4 +1,4 @@
-import { createTenant, tenants, updateTenant } from "@/api/auth-service/tenants.api";
+import { createTenant, tenants, updateTenant } from "@/api/api";
 import { useAuthStore } from "@/store";
 import type { Tenant, UpdateTenantPayload } from "@/types";
 import { LoadingOutlined, PlusOutlined, RightOutlined } from "@ant-design/icons";

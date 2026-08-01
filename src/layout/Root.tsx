@@ -1,4 +1,4 @@
-import { me } from "@/api/auth-service/auth.api";
+import { me } from "@/api/api";
 import Spinner from "@/components/Spinner";
 import { useAuthStore } from "@/store";
 import { useQuery } from "@tanstack/react-query";

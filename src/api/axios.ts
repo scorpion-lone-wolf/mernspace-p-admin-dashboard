@@ -1,5 +1,6 @@
 import { useAuthStore } from "@/store";
 import axios from "axios";
+import { AUTH_SERVICE } from "./api";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_API_URL,
@@ -14,7 +15,7 @@ const api = axios.create({
 // To avoid circular dependency between auth.api.ts and axios.ts , we are defining the functions here itself
 const refreshToken = async () => {
   await axios.post(
-    `${import.meta.env.VITE_BACKEND_API_URL}/auth/refresh`,
+    `${import.meta.env.VITE_BACKEND_API_URL}${AUTH_SERVICE}/auth/refresh`,
     {},
     {
       withCredentials: true,
