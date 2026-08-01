@@ -1,4 +1,4 @@
-import { tenants } from "@/api/tenants.api";
+import { tenants } from "@/api/auth-service/tenants.api";
 import type { Tenant } from "@/store";
 import { useQuery } from "@tanstack/react-query";
 import { Card, Col, Form, Input, Row, Select, Space } from "antd";

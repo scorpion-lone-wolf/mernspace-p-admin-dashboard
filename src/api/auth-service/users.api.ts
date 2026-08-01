@@ -1,5 +1,5 @@
 import type { CreateUserPayload, UpdateUserPayload, UserQueryFilter } from "@/types";
-import api from "./axios";
+import api from "../axios";
 
 export const users = async (page: number, limit: number, filters: UserQueryFilter) => {
   return await api.get("/users", {

@@ -1,4 +1,4 @@
-import { createUser, updateUser, users } from "@/api/users.api";
+import { createUser, updateUser, users } from "@/api/auth-service/users.api";
 import { useAuthStore } from "@/store";
 import type { CreateUserPayload, UpdateUserPayload, User } from "@/types";
 import { LoadingOutlined, PlusOutlined, RightOutlined } from "@ant-design/icons";

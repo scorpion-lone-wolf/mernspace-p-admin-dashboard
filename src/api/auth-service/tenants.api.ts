@@ -1,5 +1,5 @@
 import type { CreateTenantPayload, TenantQueryFilter, UpdateTenantPayload } from "@/types";
-import api from "./axios";
+import api from "../axios";
 
 export const tenants = async (page?: number, limit?: number, filters?: TenantQueryFilter) => {
   return await api.get("/tenants", {

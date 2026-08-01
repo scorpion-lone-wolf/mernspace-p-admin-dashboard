@@ -1,4 +1,4 @@
-import { logout } from "@/api/auth.api";
+import { logout } from "@/api/auth-service/auth.api";
 import BasketIcon from "@/components/icons/BasketIcon";
 import { foodIcon } from "@/components/icons/FoodIcon";
 import GiftIcon from "@/components/icons/GiftIcon";
