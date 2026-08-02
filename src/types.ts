@@ -47,14 +47,14 @@ export type TenantQueryFilter = {
 export type Category = {
   _id: string;
   name: string;
-  attributes: {
-    name: string;
-    widgetType: string;
-    defaultValue: string;
-    availableOptions: string[];
-  }[];
-  priceConfigurations: {
-    priceType: string;
-    availableOptions: number[];
-  }[];
+};
+
+export type Product = {
+  _id: string;
+  name: string;
+  description: string;
+  image: string;
+  category: Category;
+  isPublished: boolean;
+  createdAt: string;
 };

@@ -45,3 +45,12 @@ export const updateUser = async (id: string, user: UpdateUserPayload) => await a
 // === Catalog  Service ===
 
 export const getCategories = async () => await api.get(`${CATALOG_SERVICE}/categories`);
+
+export const getProducts = async (page: number, limit: number) => {
+  return await api.get(`${CATALOG_SERVICE}/products`, {
+    params: {
+      page,
+      limit,
+    },
+  });
+};
