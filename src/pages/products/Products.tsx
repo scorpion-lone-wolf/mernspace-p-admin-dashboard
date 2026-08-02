@@ -1,10 +1,11 @@
 import { getProducts } from "@/api/api";
-import type { Product } from "@/types";
+import type { Product, ProductQueryFilter } from "@/types";
 import { PlusOutlined, RightOutlined } from "@ant-design/icons";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Breadcrumb, Button, Flex, Form, Image, Space, Table, Tag, Typography, type TableColumnsType } from "antd";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useDebouncedCallback } from "use-debounce";
 import ProductsFilter from "./ProductFilter";
 
 const columns: TableColumnsType<Product> = [
@@ -44,15 +45,34 @@ function Products() {
   const [filterForm] = Form.useForm();
   const [page, setPage] = useState(1);
   const [limit] = useState(8);
+  const [filters, setFilters] = useState<ProductQueryFilter>({
+    search: "",
+    isPublished: undefined,
+    categoryId: "",
+    tenantId: "",
+  });
 
   // get all products
   const { data: productData, isFetching } = useQuery({
-    queryKey: ["products", page, limit],
+    queryKey: ["products", page, limit, filters],
     queryFn: async () => {
-      return (await getProducts(page, limit)).data;
+      return (await getProducts(page, limit, filters)).data;
     },
     placeholderData: keepPreviousData,
   });
+
+  const onFilterChange = useDebouncedCallback(() => {
+    const values = filterForm.getFieldsValue();
+    console.log("values", values);
+    // set page back to 1 before applying filters
+    setPage(1);
+    setFilters({
+      search: values.search,
+      isPublished: values.isPublished ? true : undefined,
+      categoryId: values.category,
+      tenantId: values.resturants,
+    });
+  }, 500);
 
   return (
     <Space vertical className="w-full" size="large">
@@ -75,7 +95,7 @@ function Products() {
         {/* {isFetching && <Spin indicator={<LoadingOutlined spin />} />} */}
         {/* {error && <Typography.Text type="danger">{error.message}</Typography.Text>} */}
       </Flex>
-      <Form form={filterForm} onFieldsChange={() => {}}>
+      <Form form={filterForm} onFieldsChange={onFilterChange}>
         <ProductsFilter>
           <Button type="primary" size="large" onClick={() => {}}>
             <Space>
@@ -105,7 +125,7 @@ function Products() {
         ]}
         dataSource={productData?.data}
         loading={isFetching}
-        rowKey={"id"}
+        rowKey={"_id"}
         pagination={{
           current: page,
           pageSize: limit,

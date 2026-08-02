@@ -2,6 +2,7 @@ import type {
   CreateTenantPayload,
   CreateUserPayload,
   Credentails,
+  ProductQueryFilter,
   TenantQueryFilter,
   UpdateTenantPayload,
   UpdateUserPayload,
@@ -46,11 +47,15 @@ export const updateUser = async (id: string, user: UpdateUserPayload) => await a
 
 export const getCategories = async () => await api.get(`${CATALOG_SERVICE}/categories`);
 
-export const getProducts = async (page: number, limit: number) => {
+export const getProducts = async (page: number, limit: number, filters: ProductQueryFilter) => {
   return await api.get(`${CATALOG_SERVICE}/products`, {
     params: {
       page,
       limit,
+      ...(filters.search?.trim() ? { search: filters.search.trim() } : {}),
+      ...(filters.isPublished ? { isPublished: true } : {}),
+      ...(filters.categoryId ? { categoryId: filters.categoryId } : {}),
+      ...(filters.tenantId ? { tenantId: filters.tenantId } : {}),
     },
   });
 };

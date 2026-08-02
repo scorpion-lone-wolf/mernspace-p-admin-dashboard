@@ -58,3 +58,10 @@ export type Product = {
   isPublished: boolean;
   createdAt: string;
 };
+
+export type ProductQueryFilter = {
+  search?: string;
+  isPublished?: boolean | string;
+  categoryId?: string;
+  tenantId?: string;
+};

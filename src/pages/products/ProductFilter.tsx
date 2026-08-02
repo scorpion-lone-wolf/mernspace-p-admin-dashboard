@@ -72,12 +72,12 @@ function ProductsFilter({ children }: Readonly<ProductFilterProps>) {
               </Form.Item>
             </Col>
             <Col xs={24} sm={6} md={8} lg={6}>
-              <Form.Item name="isPublished" className="mb-0!">
-                <Space>
-                  <Switch id="published-toggle" defaultChecked onChange={() => {}} />
-                  <Typography.Text>Show Only Published</Typography.Text>
-                </Space>
-              </Form.Item>
+              <Space>
+                <Form.Item name="isPublished" className="mb-0!">
+                  <Switch defaultChecked={false} />
+                </Form.Item>
+                <Typography.Text>Show Only Published</Typography.Text>
+              </Space>
             </Col>
           </Row>
         </Col>
