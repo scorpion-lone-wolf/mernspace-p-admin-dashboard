@@ -6,8 +6,9 @@ import { Card, Col, Flex, Form, Input, Row, Select, Space, Switch, Typography } 
 
 type ProductFilterProps = {
   children?: React.ReactNode;
+  isAdmin?: boolean;
 };
-function ProductsFilter({ children }: Readonly<ProductFilterProps>) {
+function ProductsFilter({ isAdmin, children }: Readonly<ProductFilterProps>) {
   // fetching tenant info from auth service
   const { data: resturantData, isLoading: isResturantDataLoading } = useQuery({
     queryKey: ["resturants"],
@@ -27,7 +28,6 @@ function ProductsFilter({ children }: Readonly<ProductFilterProps>) {
     },
     initialData: [],
   });
-  console.log("categoryData", categoryData);
   if (isResturantDataLoading || isCategoryDataLoading) {
     return <Spinner fullPage />;
   }
@@ -56,21 +56,24 @@ function ProductsFilter({ children }: Readonly<ProductFilterProps>) {
                 />
               </Form.Item>
             </Col>
-            <Col xs={24} sm={6} md={8} lg={6}>
-              <Form.Item name="resturants" className="mb-0!">
-                <Select
-                  placeholder="Select Resturants"
-                  allowClear
-                  className="w-full"
-                  options={resturantData?.data?.map((resturant: Tenant) => {
-                    return {
-                      value: resturant.id,
-                      label: resturant.name,
-                    };
-                  })}
-                />
-              </Form.Item>
-            </Col>
+            {isAdmin && (
+              <Col xs={24} sm={6} md={8} lg={6}>
+                <Form.Item name="resturants" className="mb-0!">
+                  <Select
+                    placeholder="Select Resturants"
+                    allowClear
+                    className="w-full"
+                    options={resturantData?.data?.map((resturant: Tenant) => {
+                      return {
+                        value: resturant.id,
+                        label: resturant.name,
+                      };
+                    })}
+                  />
+                </Form.Item>
+              </Col>
+            )}
+
             <Col xs={24} sm={6} md={8} lg={6}>
               <Space>
                 <Form.Item name="isPublished" className="mb-0!">

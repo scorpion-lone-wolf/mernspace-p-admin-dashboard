@@ -1,4 +1,5 @@
 import { getProducts } from "@/api/api";
+import { useAuthStore } from "@/store";
 import type { Product, ProductQueryFilter } from "@/types";
 import { PlusOutlined, RightOutlined } from "@ant-design/icons";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -42,6 +43,8 @@ const columns: TableColumnsType<Product> = [
 ];
 
 function Products() {
+  const user = useAuthStore((state) => state.user);
+  const isAdmin = user?.role === "ADMIN";
   const [filterForm] = Form.useForm();
   const [page, setPage] = useState(1);
   const [limit] = useState(8);
@@ -49,9 +52,8 @@ function Products() {
     search: "",
     isPublished: undefined,
     categoryId: "",
-    tenantId: "",
+    tenantId: isAdmin ? "" : user?.tenant?.id,
   });
-
   // get all products
   const { data: productData, isFetching } = useQuery({
     queryKey: ["products", page, limit, filters],
@@ -63,14 +65,13 @@ function Products() {
 
   const onFilterChange = useDebouncedCallback(() => {
     const values = filterForm.getFieldsValue();
-    console.log("values", values);
     // set page back to 1 before applying filters
     setPage(1);
     setFilters({
       search: values.search,
       isPublished: values.isPublished ? true : undefined,
       categoryId: values.category,
-      tenantId: values.resturants,
+      tenantId: isAdmin ? values.resturants : user?.tenant?.id,
     });
   }, 500);
 
@@ -96,7 +97,7 @@ function Products() {
         {/* {error && <Typography.Text type="danger">{error.message}</Typography.Text>} */}
       </Flex>
       <Form form={filterForm} onFieldsChange={onFilterChange}>
-        <ProductsFilter>
+        <ProductsFilter isAdmin={isAdmin}>
           <Button type="primary" size="large" onClick={() => {}}>
             <Space>
               <PlusOutlined />
