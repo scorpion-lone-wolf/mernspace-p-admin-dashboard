@@ -3,11 +3,12 @@ import { useAuthStore } from "@/store";
 import type { Product, ProductQueryFilter } from "@/types";
 import { PlusOutlined, RightOutlined } from "@ant-design/icons";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Button, Flex, Form, Image, Space, Table, Tag, Typography, type TableColumnsType } from "antd";
+import { Breadcrumb, Button, Drawer, Flex, Form, Image, Space, Table, Tag, theme, Typography, type TableColumnsType } from "antd";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useDebouncedCallback } from "use-debounce";
 import ProductsFilter from "./ProductFilter";
+import ProductForm from "./ProductForm";
 
 const columns: TableColumnsType<Product> = [
   {
@@ -46,6 +47,9 @@ function Products() {
   const user = useAuthStore((state) => state.user);
   const isAdmin = user?.role === "ADMIN";
   const [filterForm] = Form.useForm();
+  const [form] = Form.useForm();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const { colorBgLayout } = theme.useToken().token;
   const [page, setPage] = useState(1);
   const [limit] = useState(8);
   const [filters, setFilters] = useState<ProductQueryFilter>({
@@ -74,6 +78,17 @@ function Products() {
       tenantId: isAdmin ? values.resturants : user?.tenant?.id,
     });
   }, 500);
+  const closeDrawer = () => {
+    form.resetFields();
+    // setEditableUser(null);
+    setIsDrawerOpen(false);
+  };
+
+  const onHandleSubmit = async () => {
+    await form.validateFields();
+    const values = form.getFieldsValue();
+    console.log("product form vlaues", values);
+  };
 
   return (
     <Space vertical className="w-full" size="large">
@@ -98,7 +113,15 @@ function Products() {
       </Flex>
       <Form form={filterForm} onFieldsChange={onFilterChange}>
         <ProductsFilter isAdmin={isAdmin}>
-          <Button type="primary" size="large" onClick={() => {}}>
+          <Button
+            type="primary"
+            size="large"
+            onClick={() => {
+              form.resetFields();
+              //   setEditableUser(null);
+              setIsDrawerOpen(true);
+            }}
+          >
             <Space>
               <PlusOutlined />
               Create Product
@@ -140,6 +163,30 @@ function Products() {
           },
         }}
       />
+      <Drawer
+        title={"Create a New Product"}
+        open={isDrawerOpen}
+        styles={{
+          body: {
+            background: colorBgLayout,
+          },
+        }}
+        size={720}
+        destroyOnHidden={true}
+        onClose={closeDrawer}
+        extra={
+          <Space>
+            <Button onClick={closeDrawer}>Cancel</Button>
+            <Button onClick={onHandleSubmit} type="primary">
+              Submit
+            </Button>
+          </Space>
+        }
+      >
+        <Form layout="vertical" form={form}>
+          <ProductForm />
+        </Form>
+      </Drawer>
     </Space>
   );
 }
