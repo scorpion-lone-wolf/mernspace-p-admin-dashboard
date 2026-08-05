@@ -6,7 +6,6 @@ type PricingProps = {
 };
 
 function Pricing({ selectedCategory }: Readonly<PricingProps>) {
-  console.log("selectedCategory", selectedCategory);
   return (
     <Card title="Product Pricing">
       <Space orientation="vertical" size="large" style={{ width: "100%" }}>

@@ -111,7 +111,7 @@ function ProductForm({ isEditMode = false }: Readonly<UserFormProps>) {
           {selectedCategory && (
             <>
               <Pricing selectedCategory={categoryData?.data.filter((category: Category) => category._id === selectedCategory)[0]} />
-              <Attributes />
+              <Attributes selectedCategory={categoryData?.data.filter((category: Category) => category._id === selectedCategory)[0]} />
             </>
           )}
           <Card title="Other Properties">
