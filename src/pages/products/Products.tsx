@@ -1,9 +1,9 @@
 import { createProduct, getProducts } from "@/api/api";
 import { useAuthStore } from "@/store";
 import type { Product, ProductQueryFilter } from "@/types";
-import { LoadingOutlined, PlusOutlined, RightOutlined } from "@ant-design/icons";
+import { PlusOutlined, RightOutlined } from "@ant-design/icons";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Breadcrumb, Button, Drawer, Flex, Form, Image, Space, Spin, Table, Tag, theme, Typography, type TableColumnsType } from "antd";
+import { Breadcrumb, Button, Drawer, Flex, Form, Image, Space, Table, Tag, theme, Typography, type TableColumnsType } from "antd";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useDebouncedCallback } from "use-debounce";
@@ -233,8 +233,8 @@ function Products() {
         extra={
           <Space>
             <Button onClick={closeDrawer}>Cancel</Button>
-            <Button onClick={onHandleSubmit} type="primary">
-              {isSubmitting ? <Spin indicator={<LoadingOutlined spin />} /> : "Submit"}
+            <Button onClick={onHandleSubmit} type="primary" loading={isSubmitting}>
+              Submit
             </Button>
           </Space>
         }
