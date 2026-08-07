@@ -1,5 +1,5 @@
 import { getCategories, getTenants } from "@/api/api";
-import type { Tenant } from "@/store";
+import { useAuthStore, type Tenant } from "@/store";
 import type { Category } from "@/types";
 import { PlusOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
@@ -12,6 +12,7 @@ import Pricing from "./Pricing";
 // };
 
 function ProductForm() {
+  const user = useAuthStore((state) => state.user);
   const selectedCategory = Form.useWatch("category");
   const {
     data: tenantData,
@@ -91,23 +92,26 @@ function ProductForm() {
               </Col>
             </Row>
           </Card>
-          <Card title="Tenant info">
-            <Row gutter={24}>
-              <Col span={24}>
-                <Form.Item name="tenantId" label="Select Resturant" rules={[{ required: true }, { type: "string" }]}>
-                  <Select
-                    placeholder="Select Resturant"
-                    size="large"
-                    allowClear
-                    onChange={() => {}}
-                    loading={isLoading}
-                    options={tenantData?.data?.map((tenant: Tenant) => ({ value: tenant.id, label: tenant.name }))}
-                    listHeight={200}
-                  />
-                </Form.Item>
-              </Col>
-            </Row>
-          </Card>
+          {user?.role === "admin" && (
+            <Card title="Tenant info">
+              <Row gutter={24}>
+                <Col span={24}>
+                  <Form.Item name="tenantId" label="Select Resturant" rules={[{ required: true }, { type: "string" }]}>
+                    <Select
+                      placeholder="Select Resturant"
+                      size="large"
+                      allowClear
+                      onChange={() => {}}
+                      loading={isLoading}
+                      options={tenantData?.data?.map((tenant: Tenant) => ({ value: tenant.id, label: tenant.name }))}
+                      listHeight={200}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+            </Card>
+          )}
+
           {selectedCategory && (
             <>
               <Pricing selectedCategory={categoryData?.data.filter((category: Category) => category._id === selectedCategory)[0]} />

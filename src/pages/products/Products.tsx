@@ -133,7 +133,7 @@ function Products() {
     const postData = {
       name: values.name,
       description: values.description,
-      tenantId: values.tenantId,
+      tenantId: user?.role === "MANAGER" ? user?.tenant?.id : values.tenantId,
       categoryId: values.category,
       isPublished: values.isPublished,
       image: values.image,
