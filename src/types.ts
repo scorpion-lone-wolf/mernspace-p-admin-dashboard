@@ -1,3 +1,5 @@
+import type { UploadFile } from "antd";
+
 export type Credentails = {
   email: string;
   password: string;
@@ -68,10 +70,10 @@ export type Product = {
   _id: string;
   name: string;
   description: string;
+  tenantId: string;
   image: string;
   category: Category;
   isPublished: boolean;
-  createdAt: string;
 };
 
 export type ProductQueryFilter = {
@@ -79,4 +81,20 @@ export type ProductQueryFilter = {
   isPublished?: boolean | string;
   categoryId?: string;
   tenantId?: string;
+};
+
+export type CreateProductData = {
+  // _id: string;
+  name: string;
+  description: string;
+  tenantId: string;
+  image: ProductFormImage;
+  categoryId: Category["_id"];
+  isPublished: boolean;
+  priceConfiguration: Record<string, { priceType: string; availableOptions: Record<string, number> }>;
+  attribute: { name: string; value: unknown }[];
+};
+export type ProductFormImage = {
+  file: UploadFile;
+  fileList: UploadFile[];
 };

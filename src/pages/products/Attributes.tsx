@@ -12,7 +12,7 @@ function Attributes({ selectedCategory }: Readonly<PricingProps>) {
         <Form.Item
           key={attribute.name}
           label={attribute.name}
-          name={[attribute.name, "value"]}
+          name={["attribute", attribute.name]}
           rules={attribute.widgetType === "radio" ? [{ required: true }] : undefined}
           valuePropName={attribute.widgetType === "switch" ? "checked" : "value"}
           initialValue={attribute.widgetType === "switch" ? attribute.defaultValue === "Yes" : attribute.defaultValue}

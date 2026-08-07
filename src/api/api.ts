@@ -59,3 +59,10 @@ export const getProducts = async (page: number, limit: number, filters: ProductQ
     },
   });
 };
+
+export const createProduct = async (product: FormData) =>
+  await api.post(`${CATALOG_SERVICE}/products`, product, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });

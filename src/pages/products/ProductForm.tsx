@@ -3,15 +3,15 @@ import type { Tenant } from "@/store";
 import type { Category } from "@/types";
 import { PlusOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Card, Col, Form, Input, Row, Select, Space, Switch, Typography, Upload } from "antd";
+import { Card, Col, Form, Input, Row, Select, Space, Switch, Typography, Upload } from "antd";
 import Attributes from "./Attributes";
 import Pricing from "./Pricing";
 
-type UserFormProps = {
-  isEditMode?: boolean;
-};
+// type UserFormProps = {
+//   isEditMode?: boolean;
+// };
 
-function ProductForm({ isEditMode = false }: Readonly<UserFormProps>) {
+function ProductForm() {
   const selectedCategory = Form.useWatch("category");
   const {
     data: tenantData,
@@ -71,21 +71,21 @@ function ProductForm({ isEditMode = false }: Readonly<UserFormProps>) {
           <Card title="Product image">
             <Row gutter={18}>
               <Col span={12}>
-                <Form.Item name="image" valuePropName="fileList" rules={[{ required: !isEditMode }, { type: "string", min: 6 }]}>
-                  <Upload
-                    name="avatar"
-                    listType="picture-card"
-                    className="avatar-uploader"
-                    showUploadList={false}
-                    beforeUpload={() => {}}
-                    onChange={() => {}}
-                  >
-                    <Button style={{ border: 0, background: "none" }}>
-                      <Space orientation="vertical">
-                        <PlusOutlined />
-                        <Typography.Text>Upload</Typography.Text>
-                      </Space>
-                    </Button>
+                <Form.Item
+                  label=""
+                  name="image"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please upload a product image",
+                    },
+                  ]}
+                >
+                  <Upload maxCount={1} listType="picture-card" className="avatar-uploader">
+                    <Space orientation="vertical">
+                      <PlusOutlined />
+                      <Typography.Text>Upload</Typography.Text>
+                    </Space>
                   </Upload>
                 </Form.Item>
               </Col>
@@ -118,8 +118,8 @@ function ProductForm({ isEditMode = false }: Readonly<UserFormProps>) {
             <Row gutter={24}>
               <Col span={24}>
                 <Space style={{ display: "flex", alignItems: "center" }}>
-                  <Form.Item name="isPublished" noStyle>
-                    <Switch defaultValue={false} checkedChildren="Yes" unCheckedChildren="No" />
+                  <Form.Item name="isPublished" noStyle initialValue={true}>
+                    <Switch checkedChildren="Yes" unCheckedChildren="No" />
                   </Form.Item>
                   <Typography.Text>Published</Typography.Text>
                 </Space>

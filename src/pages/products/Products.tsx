@@ -1,14 +1,15 @@
-import { getProducts } from "@/api/api";
+import { createProduct, getProducts } from "@/api/api";
 import { useAuthStore } from "@/store";
 import type { Product, ProductQueryFilter } from "@/types";
-import { PlusOutlined, RightOutlined } from "@ant-design/icons";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Button, Drawer, Flex, Form, Image, Space, Table, Tag, theme, Typography, type TableColumnsType } from "antd";
+import { LoadingOutlined, PlusOutlined, RightOutlined } from "@ant-design/icons";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Breadcrumb, Button, Drawer, Flex, Form, Image, Space, Spin, Table, Tag, theme, Typography, type TableColumnsType } from "antd";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useDebouncedCallback } from "use-debounce";
 import ProductsFilter from "./ProductFilter";
 import ProductForm from "./ProductForm";
+import { makeFormData } from "./helper";
 
 const columns: TableColumnsType<Product> = [
   {
@@ -45,6 +46,7 @@ const columns: TableColumnsType<Product> = [
 
 function Products() {
   const user = useAuthStore((state) => state.user);
+  const queryClient = useQueryClient();
   const isAdmin = user?.role === "ADMIN";
   const [filterForm] = Form.useForm();
   const [form] = Form.useForm();
@@ -65,6 +67,20 @@ function Products() {
       return (await getProducts(page, limit, filters)).data;
     },
     placeholderData: keepPreviousData,
+  });
+  const { mutate: createProductMutation, isPending: isSubmitting } = useMutation({
+    mutationKey: ["products"],
+    mutationFn: async (product: FormData) => {
+      // Return the request so React Query waits for the product to be created
+      // before running onSuccess (and refetching the list).
+      return await createProduct(product);
+    },
+    onSuccess: () => {
+      // Invalidate every product-list variant (page/filter combinations).
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      setIsDrawerOpen(false);
+      form.resetFields();
+    },
   });
 
   const onFilterChange = useDebouncedCallback(() => {
@@ -87,7 +103,47 @@ function Products() {
   const onHandleSubmit = async () => {
     await form.validateFields();
     const values = form.getFieldsValue();
-    console.log("product form vlaues", values);
+    const priceConfig = values.priceConfiguration;
+
+    const pricing = Object.entries(priceConfig).reduce(
+      (acc, [key, value]) => {
+        const keyObject = JSON.parse(key);
+
+        acc[keyObject.configurationKey] = {
+          priceType: keyObject.priceType,
+          availableOptions: Object.fromEntries(Object.entries(value as Record<string, string>).map(([option, price]) => [option, Number(price)])),
+        };
+
+        return acc;
+      },
+      {} as Record<
+        string,
+        {
+          priceType: string;
+          availableOptions: Record<string, number>;
+        }
+      >,
+    );
+
+    const attribute = Object.entries(values.attribute).map(([key, value]) => ({
+      name: key,
+      value,
+    }));
+
+    const postData = {
+      name: values.name,
+      description: values.description,
+      tenantId: values.tenantId,
+      categoryId: values.category,
+      isPublished: values.isPublished,
+      image: values.image,
+      attribute: attribute,
+      priceConfiguration: pricing,
+    };
+
+    // converting the object to form data as we need multipart form data for file upload in backend
+    const formData = makeFormData(postData);
+    createProductMutation(formData);
   };
 
   return (
@@ -178,7 +234,7 @@ function Products() {
           <Space>
             <Button onClick={closeDrawer}>Cancel</Button>
             <Button onClick={onHandleSubmit} type="primary">
-              Submit
+              {isSubmitting ? <Spin indicator={<LoadingOutlined spin />} /> : "Submit"}
             </Button>
           </Space>
         }
