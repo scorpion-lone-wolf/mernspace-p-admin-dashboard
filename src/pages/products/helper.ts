@@ -1,4 +1,4 @@
-import type { CreateProductData, Product, ProductListResponse, ProductPriceConfiguration } from "@/types";
+import type { CreateProductData, ProductPriceConfiguration } from "@/types";
 
 export const makePriceConfigurationFormValues = (priceConfiguration: ProductPriceConfiguration) =>
   Object.fromEntries(
@@ -7,15 +7,6 @@ export const makePriceConfigurationFormValues = (priceConfiguration: ProductPric
       configuration.availableOptions,
     ]),
   );
-
-export const replaceProductInList = (cachedProducts: ProductListResponse | undefined, updatedProduct: Product) => {
-  if (!cachedProducts) return cachedProducts;
-
-  return {
-    ...cachedProducts,
-    data: cachedProducts.data.map((product) => (product._id === updatedProduct._id ? updatedProduct : product)),
-  };
-};
 
 export const makeFormData = (data: CreateProductData) => {
   const formData = new FormData();
