@@ -59,6 +59,13 @@ export type PriceConfiguration = {
     availableOptions: string[];
   };
 };
+
+export type ProductPriceConfiguration = {
+  [key: string]: {
+    priceType: "base" | "additional";
+    availableOptions: Record<string, number>;
+  };
+};
 export type Attribute = {
   name: string;
   widgetType: "radio" | "switch";
@@ -72,8 +79,17 @@ export type Product = {
   description: string;
   tenantId: string;
   image: string;
-  category: Category;
+  categoryId: Category["_id"] | Category;
+  priceConfiguration: ProductPriceConfiguration;
+  attribute: { name: string; value: unknown }[];
   isPublished: boolean;
+};
+
+export type ProductListResponse = {
+  data: Product[];
+  total: number;
+  page: number;
+  limit: number;
 };
 
 export type ProductQueryFilter = {
@@ -88,13 +104,9 @@ export type CreateProductData = {
   name: string;
   description: string;
   tenantId: string;
-  image: ProductFormImage;
+  image: UploadFile[];
   categoryId: Category["_id"];
   isPublished: boolean;
-  priceConfiguration: Record<string, { priceType: string; availableOptions: Record<string, number> }>;
+  priceConfiguration: ProductPriceConfiguration;
   attribute: { name: string; value: unknown }[];
-};
-export type ProductFormImage = {
-  file: UploadFile;
-  fileList: UploadFile[];
 };

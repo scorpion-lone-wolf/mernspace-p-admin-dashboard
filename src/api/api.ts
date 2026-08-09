@@ -2,6 +2,8 @@ import type {
   CreateTenantPayload,
   CreateUserPayload,
   Credentails,
+  Product,
+  ProductListResponse,
   ProductQueryFilter,
   TenantQueryFilter,
   UpdateTenantPayload,
@@ -48,7 +50,7 @@ export const updateUser = async (id: string, user: UpdateUserPayload) => await a
 export const getCategories = async () => await api.get(`${CATALOG_SERVICE}/categories`);
 
 export const getProducts = async (page: number, limit: number, filters: ProductQueryFilter) => {
-  return await api.get(`${CATALOG_SERVICE}/products`, {
+  return await api.get<ProductListResponse>(`${CATALOG_SERVICE}/products`, {
     params: {
       page,
       limit,
@@ -62,6 +64,13 @@ export const getProducts = async (page: number, limit: number, filters: ProductQ
 
 export const createProduct = async (product: FormData) =>
   await api.post(`${CATALOG_SERVICE}/products`, product, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+export const updateProduct = async (id: string, product: FormData) =>
+  await api.patch<Product>(`${CATALOG_SERVICE}/products/${id}`, product, {
     headers: {
       "Content-Type": "multipart/form-data",
     },

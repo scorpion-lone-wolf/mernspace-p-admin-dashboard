@@ -7,10 +7,6 @@ import { Card, Col, Form, Input, Row, Select, Space, Switch, Typography, Upload 
 import Attributes from "./Attributes";
 import Pricing from "./Pricing";
 
-// type UserFormProps = {
-//   isEditMode?: boolean;
-// };
-
 function ProductForm() {
   const user = useAuthStore((state) => state.user);
   const selectedCategory = Form.useWatch("category");
@@ -33,6 +29,8 @@ function ProductForm() {
     },
     initialData: [],
   });
+  const selectedCategoryData = categoryData?.data?.find((category: Category) => category._id === selectedCategory);
+
   if (error) {
     return <div>Something went wrong.</div>;
   }
@@ -75,6 +73,8 @@ function ProductForm() {
                 <Form.Item
                   label=""
                   name="image"
+                  valuePropName="fileList"
+                  getValueFromEvent={(event) => (Array.isArray(event) ? event : event?.fileList)}
                   rules={[
                     {
                       required: true,
@@ -92,7 +92,7 @@ function ProductForm() {
               </Col>
             </Row>
           </Card>
-          {user?.role === "admin" && (
+          {user?.role === "ADMIN" && (
             <Card title="Tenant info">
               <Row gutter={24}>
                 <Col span={24}>
@@ -112,10 +112,10 @@ function ProductForm() {
             </Card>
           )}
 
-          {selectedCategory && (
+          {selectedCategoryData && (
             <>
-              <Pricing selectedCategory={categoryData?.data.filter((category: Category) => category._id === selectedCategory)[0]} />
-              <Attributes selectedCategory={categoryData?.data.filter((category: Category) => category._id === selectedCategory)[0]} />
+              <Pricing selectedCategory={selectedCategoryData} />
+              <Attributes selectedCategory={selectedCategoryData} />
             </>
           )}
           <Card title="Other Properties">

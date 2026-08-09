@@ -1,15 +1,15 @@
-import { createProduct, getProducts } from "@/api/api";
+import { createProduct, getProducts, updateProduct } from "@/api/api";
 import { useAuthStore } from "@/store";
-import type { Product, ProductQueryFilter } from "@/types";
+import type { Product, ProductPriceConfiguration, ProductQueryFilter } from "@/types";
 import { PlusOutlined, RightOutlined } from "@ant-design/icons";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Breadcrumb, Button, Drawer, Flex, Form, Image, Space, Table, Tag, theme, Typography, type TableColumnsType } from "antd";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useDebouncedCallback } from "use-debounce";
 import ProductsFilter from "./ProductFilter";
 import ProductForm from "./ProductForm";
-import { makeFormData } from "./helper";
+import { makeFormData, makePriceConfigurationFormValues } from "./helper";
 
 const columns: TableColumnsType<Product> = [
   {
@@ -46,6 +46,7 @@ const columns: TableColumnsType<Product> = [
 
 function Products() {
   const user = useAuthStore((state) => state.user);
+  const [editableProduct, setEditableProduct] = useState<Product | null>(null);
   const queryClient = useQueryClient();
   const isAdmin = user?.role === "ADMIN";
   const [filterForm] = Form.useForm();
@@ -54,6 +55,7 @@ function Products() {
   const { colorBgLayout } = theme.useToken().token;
   const [page, setPage] = useState(1);
   const [limit] = useState(8);
+  const isEditing = !!editableProduct;
   const [filters, setFilters] = useState<ProductQueryFilter>({
     search: "",
     isPublished: undefined,
@@ -68,20 +70,37 @@ function Products() {
     },
     placeholderData: keepPreviousData,
   });
-  const { mutate: createProductMutation, isPending: isSubmitting } = useMutation({
+
+  const closeDrawer = () => {
+    form.resetFields();
+    setEditableProduct(null);
+    setIsDrawerOpen(false);
+  };
+
+  const refreshProductsAndClose = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["products"], refetchType: "active" });
+    closeDrawer();
+  };
+
+  const { mutate: createProductMutation, isPending: isCreating } = useMutation({
     mutationKey: ["products"],
     mutationFn: async (product: FormData) => {
       // Return the request so React Query waits for the product to be created
       // before running onSuccess (and refetching the list).
       return await createProduct(product);
     },
-    onSuccess: () => {
-      // Invalidate every product-list variant (page/filter combinations).
-      queryClient.invalidateQueries({ queryKey: ["products"] });
-      setIsDrawerOpen(false);
-      form.resetFields();
-    },
+    onSuccess: refreshProductsAndClose,
   });
+
+  const { mutate: updateProductMutation, isPending: isUpdating } = useMutation({
+    mutationKey: ["products", editableProduct?._id],
+    mutationFn: async ({ id, product }: { id: string; product: FormData }) => {
+      return await updateProduct(id, product);
+    },
+    onSuccess: refreshProductsAndClose,
+  });
+
+  const isSubmitting = isCreating || isUpdating;
 
   const onFilterChange = useDebouncedCallback(() => {
     const values = filterForm.getFieldsValue();
@@ -94,36 +113,52 @@ function Products() {
       tenantId: isAdmin ? values.resturants : user?.tenant?.id,
     });
   }, 500);
-  const closeDrawer = () => {
-    form.resetFields();
-    // setEditableUser(null);
-    setIsDrawerOpen(false);
-  };
+  React.useEffect(() => {
+    if (editableProduct) {
+      const attribute = Object.fromEntries(editableProduct.attribute.map(({ name, value }) => [name, value]));
 
+      const imageName = editableProduct.image.split("/").pop()?.split("?")[0] || "product-image";
+
+      // Remove registered values from the previously edited product before
+      // hydrating the form with the newly selected product.
+      form.resetFields();
+      form.setFieldsValue({
+        name: editableProduct.name,
+        description: editableProduct.description,
+        category: typeof editableProduct.categoryId === "string" ? editableProduct.categoryId : editableProduct.categoryId._id,
+        isPublished: editableProduct.isPublished,
+        image: [
+          {
+            uid: editableProduct._id,
+            name: imageName,
+            status: "done",
+            url: editableProduct.image,
+          },
+        ],
+        attribute,
+        tenantId: editableProduct.tenantId,
+        priceConfiguration: makePriceConfigurationFormValues(editableProduct.priceConfiguration),
+      });
+    }
+  }, [editableProduct, form]);
   const onHandleSubmit = async () => {
     await form.validateFields();
     const values = form.getFieldsValue();
     const priceConfig = values.priceConfiguration;
 
-    const pricing = Object.entries(priceConfig).reduce(
-      (acc, [key, value]) => {
-        const keyObject = JSON.parse(key);
+    const pricing = Object.entries(priceConfig).reduce((acc, [key, value]) => {
+      const keyObject = JSON.parse(key) as {
+        configurationKey: string;
+        priceType: "base" | "additional";
+      };
 
-        acc[keyObject.configurationKey] = {
-          priceType: keyObject.priceType,
-          availableOptions: Object.fromEntries(Object.entries(value as Record<string, string>).map(([option, price]) => [option, Number(price)])),
-        };
+      acc[keyObject.configurationKey] = {
+        priceType: keyObject.priceType,
+        availableOptions: Object.fromEntries(Object.entries(value as Record<string, string>).map(([option, price]) => [option, Number(price)])),
+      };
 
-        return acc;
-      },
-      {} as Record<
-        string,
-        {
-          priceType: string;
-          availableOptions: Record<string, number>;
-        }
-      >,
-    );
+      return acc;
+    }, {} as ProductPriceConfiguration);
 
     const attribute = Object.entries(values.attribute).map(([key, value]) => ({
       name: key,
@@ -143,6 +178,12 @@ function Products() {
 
     // converting the object to form data as we need multipart form data for file upload in backend
     const formData = makeFormData(postData);
+
+    if (editableProduct) {
+      updateProductMutation({ id: editableProduct._id, product: formData });
+      return;
+    }
+
     createProductMutation(formData);
   };
 
@@ -174,7 +215,7 @@ function Products() {
             size="large"
             onClick={() => {
               form.resetFields();
-              //   setEditableUser(null);
+              setEditableProduct(null);
               setIsDrawerOpen(true);
             }}
           >
@@ -192,10 +233,16 @@ function Products() {
           {
             title: "Action",
             key: "actions",
-            render: () => {
+            render: (_, record: Product) => {
               return (
                 <Space>
-                  <Button type="link" onClick={() => {}}>
+                  <Button
+                    type="link"
+                    onClick={() => {
+                      setIsDrawerOpen(true);
+                      setEditableProduct(record);
+                    }}
+                  >
                     Edit
                   </Button>
                 </Space>
@@ -220,7 +267,7 @@ function Products() {
         }}
       />
       <Drawer
-        title={"Create a New Product"}
+        title={isEditing ? "Edit Product" : "Create a New Product"}
         open={isDrawerOpen}
         styles={{
           body: {
