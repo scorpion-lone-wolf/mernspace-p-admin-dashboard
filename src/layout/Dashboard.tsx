@@ -10,7 +10,7 @@ import Icon, { BellFilled, DownOutlined } from "@ant-design/icons";
 import { useMutation } from "@tanstack/react-query";
 import { Avatar, Badge, Dropdown, Flex, Layout, Menu, Space, Tag, theme } from "antd";
 import { useState } from "react";
-import { Link, Navigate, NavLink, Outlet, useLocation } from "react-router-dom";
+import { Link, Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 const { Sider, Header, Content, Footer } = Layout;
 
@@ -18,30 +18,30 @@ const getMenuItems = (role: string) => {
   const baseItems = [
     {
       key: "/",
-      label: <NavLink to="/">Home</NavLink>,
+      label: "Home",
       icon: <Icon component={HomeIcon} />,
     },
 
     {
       key: "/products",
-      label: <NavLink to="/products">Products</NavLink>,
+      label: "Products",
       icon: <Icon component={BasketIcon} />,
     },
     {
-      key: "/promo",
-      label: <NavLink to="/promo">Promo</NavLink>,
+      key: "/coupons",
+      label: "Coupons",
       icon: <Icon component={GiftIcon} />,
     },
   ];
   if (role === "ADMIN") {
     baseItems.splice(1, 0, {
       key: "/users",
-      label: <NavLink to="/users">Users</NavLink>,
+      label: "Users",
       icon: <Icon component={UserIcon} />,
     });
     baseItems.splice(2, 0, {
       key: "/resturants",
-      label: <NavLink to="/resturants">Resturants</NavLink>,
+      label: "Resturants",
       icon: <Icon component={foodIcon} />,
     });
   }
@@ -51,6 +51,7 @@ const getMenuItems = (role: string) => {
 function Dashboard() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const {
     token: { colorBgContainer, colorPrimary },
   } = theme.useToken();
@@ -80,7 +81,13 @@ function Dashboard() {
               <Logo />
             </Link>
           </div>
-          <Menu theme="light" selectedKeys={[location.pathname]} mode="inline" items={getMenuItems(user?.role)} />
+          <Menu
+            theme="light"
+            selectedKeys={[location.pathname]}
+            mode="inline"
+            items={getMenuItems(user?.role)}
+            onClick={({ key }) => navigate(key)}
+          />
         </Sider>
         <Layout>
           <Header style={{ paddingLeft: "1rem", paddingRight: "1rem", background: colorBgContainer }}>

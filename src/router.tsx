@@ -3,6 +3,7 @@ import Dashboard from "./layout/Dashboard";
 import NonAuth from "./layout/NonAuth";
 import Root from "./layout/Root";
 import HomePage from "./pages/HomePage";
+import Coupons from "./pages/coupons/Coupons";
 import LoginPage from "./pages/login/Login";
 import Products from "./pages/products/Products";
 import Tenants from "./pages/tenants/Tenants";
@@ -32,6 +33,10 @@ const router = createBrowserRouter([
           {
             path: "/products",
             element: <Products />,
+          },
+          {
+            path: "/coupons",
+            element: <Coupons />,
           },
         ],
       },

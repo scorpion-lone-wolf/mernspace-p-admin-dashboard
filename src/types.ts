@@ -110,3 +110,22 @@ export type CreateProductData = {
   priceConfiguration: ProductPriceConfiguration;
   attribute: { name: string; value: unknown }[];
 };
+
+export type Coupon = {
+  _id: string;
+  title: string;
+  code: string;
+  discount: number;
+  validUpto: string;
+  tenant: string;
+};
+
+export type CouponListResponse = {
+  data: Coupon[];
+  total: number;
+  page: number;
+  limit: number;
+};
+
+export type CreateCouponPayload = Omit<Coupon, "_id">;
+export type UpdateCouponPayload = Partial<CreateCouponPayload>;

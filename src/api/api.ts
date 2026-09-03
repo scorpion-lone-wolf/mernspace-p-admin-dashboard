@@ -1,12 +1,15 @@
 import type {
   CreateTenantPayload,
+  CreateCouponPayload,
   CreateUserPayload,
+  CouponListResponse,
   Credentails,
   Product,
   ProductListResponse,
   ProductQueryFilter,
   TenantQueryFilter,
   UpdateTenantPayload,
+  UpdateCouponPayload,
   UpdateUserPayload,
   UserQueryFilter,
 } from "@/types";
@@ -14,6 +17,7 @@ import api from "./axios";
 
 export const AUTH_SERVICE = "/api/auth";
 const CATALOG_SERVICE = "/api/catalog";
+const ORDER_SERVICE = "/api/order";
 
 // === Auth Service ===
 export const login = async (credentials: Credentails) => await api.post(`${AUTH_SERVICE}/auth/login`, credentials);
@@ -75,3 +79,17 @@ export const updateProduct = async (id: string, product: FormData) =>
       "Content-Type": "multipart/form-data",
     },
   });
+
+// === Order Service ===
+export const getCoupons = async (page: number, limit: number, tenant?: string) =>
+  await api.get<CouponListResponse>(`${ORDER_SERVICE}/coupons`, {
+    params: {
+      page,
+      limit,
+      ...(tenant ? { tenant } : {}),
+    },
+  });
+
+export const createCoupon = async (coupon: CreateCouponPayload) => await api.post(`${ORDER_SERVICE}/coupons`, coupon);
+export const updateCoupon = async (id: string, coupon: UpdateCouponPayload) =>
+  await api.patch(`${ORDER_SERVICE}/coupons/${id}`, coupon);
